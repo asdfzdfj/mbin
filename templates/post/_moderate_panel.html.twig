@@ -16,7 +16,7 @@
         <li>
             <form action="{{ post_delete_url(post) }}"
                   method="post"
-                  onsubmit="return confirm('{{ 'are_you_sure'|trans }}');">
+                  data-action="confirmation#ask" data-confirmation-message-param="{{ 'are_you_sure'|trans }}">
                 <input type="hidden" name="token" value="{{ csrf_token('post_delete') }}">
                 <button type="submit">
                     <span>{{ 'delete'|trans|lower }}</span>
@@ -27,7 +27,7 @@
             <li>
                 <form action="{{ path('post_purge', {magazine_name: post.magazine.name, post_id: post.id,}) }}"
                       method="post"
-                      onsubmit="return confirm('{{ 'are_you_sure'|trans }}');">
+                      data-action="confirmation#ask" data-confirmation-message-param="{{ 'are_you_sure'|trans }}">
                     <input type="hidden" name="token" value="{{ csrf_token('post_purge') }}">
                     <button type="submit">
                         <span>{{ 'purge'|trans|lower }}</span>
@@ -40,7 +40,7 @@
                 <form name="change_magazine"
                       action="{{ path('post_change_magazine', {magazine_name: post.magazine.name, post_id: post.id}) }}"
                       method="post"
-                      onsubmit="return confirm('{{ 'are_you_sure'|trans }}');">
+                      data-action="confirmation#ask" data-confirmation-message-param="{{ 'are_you_sure'|trans }}">
                     <input type="hidden" name="token" value="{{ csrf_token('change_magazine') }}">
                     <input id="change_magazine_new_magazine" name="change_magazine[new_magazine]">
                     <button type="submit" class="btn btn__secondary">
@@ -59,7 +59,7 @@
             <div class="checkbox">
                 <form action="{{ path('post_change_adult', {magazine_name: magazine.name, post_id: post.id}) }}"
                       method="post"
-                      onsubmit="return confirm('{{ 'are_you_sure'|trans }}');">
+                      data-action="confirmation#ask" data-confirmation-message-param="{{ 'are_you_sure'|trans }}">
                     <input type="hidden" name="token" value="{{ csrf_token('change_adult') }}">
                     <input name="adult"
                            type="checkbox" {{ post.isAdult ? 'checked' : '' }}>

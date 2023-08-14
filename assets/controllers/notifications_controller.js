@@ -4,7 +4,10 @@ import Subscribe from '../utils/event-source';
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
     static values = {
-        magazineName: String,
+        kbinUser: String,
+        kbinMagazine: String,
+        kbinEntryId: String,
+        kbinPostId: String,
     }
 
     connect() {
@@ -58,23 +61,23 @@ export default class extends Controller {
             'count'
         ]
 
-        if (window.KBIN_USER) {
-            topics.push(`/api/users/${window.KBIN_USER}`);
+        if (this.kbinUserValue) {
+            topics.push(`/api/user/${this.kbinUserValue}`);
             pub = true;
         }
 
-        if (window.KBIN_MAGAZINE) {
-            topics.push(`/api/magazines/${window.KBIN_MAGAZINE}`);
+        if (this.kbinMagazineValue) {
+            topics.push(`/api/magazines/${this.kbinMagazineValue}`);
             pub = false;
         }
 
-        if (window.KBIN_ENTRY_ID) {
-            topics.push(`/api/entries/${window.KBIN_ENTRY_ID}`);
+        if (this.kbinEntryIdValue) {
+            topics.push(`/api/entries/${this.kbinEntryIdValue}`);
             pub = false;
         }
 
-        if (window.KBIN_POST_ID) {
-            topics.push(`/api/posts/${window.KBIN_POST_ID}`);
+        if (this.kbinPostIdValue) {
+            topics.push(`/api/posts/${this.kbinPostIdValue}`);
             pub = false;
         }
 

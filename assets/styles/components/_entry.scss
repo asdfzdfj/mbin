@@ -136,10 +136,14 @@
       position: absolute;
       background-position: center;
       filter: blur(8px);
-      width: 110%;
-      height: 110%;
-      top: -5%;
-      left: -5%;
+      width: 150%;
+      height: 150%;
+      top: -25%;
+      left: -25%;
+
+      img {
+        object-fit: cover;
+      }
     }
 
     .rounded-edges & {

@@ -49,10 +49,8 @@
     {% endblock %}
 
     {% if not app.user or not app.user.ignoreMagazinesCustomCss %}
-        {% if magazine is defined and magazine %}
-            <style>
-                {{ magazine.customCss }}
-            </style>
+        {% if magazine is defined and magazine.customCss %}
+            <link rel="stylesheet" href="{{ path('magazine_style', {name: magazine.name, _format: 'css'}) }}">
         {% endif %}
     {% endif %}
     {% if app.user and app.user.customCss %}

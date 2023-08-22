@@ -25,10 +25,6 @@ security:
         image_resolver:
             pattern: ^/media/cache/resolve
             security: false
-        magazine_style:
-            pattern: ^/magstyle
-            security: false
-            stateless: true
         main:
             lazy: true
             provider: app_user_provider

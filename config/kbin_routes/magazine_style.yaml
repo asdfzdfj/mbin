@@ -2,6 +2,7 @@ magazine_style:
   controller: App\Controller\Magazine\MagazineStyleController
   path: /magstyle/{name}.{_format}
   methods: [ GET ]
+  stateless: true
   requirements:
     name: '.+'
     _format: css

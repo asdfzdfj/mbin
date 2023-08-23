@@ -1,0 +1,7 @@
+magazine_style:
+  controller: App\Controller\CustomStyleController::magazineCustomStyle
+  path: /customstyle/m/{name}.css
+  methods: [ GET ]
+  stateless: true
+  requirements:
+    name: '[^/]+'

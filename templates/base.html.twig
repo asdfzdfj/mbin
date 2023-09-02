@@ -50,13 +50,11 @@
 
     {% if not app.user or not app.user.ignoreMagazinesCustomCss %}
         {% if magazine is defined and magazine.customCss %}
-            <link rel="stylesheet" href="{{ path('magazine_style', {name: magazine.name, _format: 'css'}) }}">
+            <link rel="stylesheet" href="{{ path('magazine_style', {name: magazine.name}) }}">
         {% endif %}
     {% endif %}
     {% if app.user and app.user.customCss %}
-        <style>
-            {{ app.user.customCss }}
-        </style>
+        <link rel="stylesheet" href="{{ path('user_style') }}">
     {% endif %}
 </head>
 <body class="{{ html_classes(app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_THEME'))

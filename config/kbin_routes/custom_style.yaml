@@ -5,3 +5,9 @@ magazine_style:
   stateless: true
   requirements:
     name: '[^/]+'
+
+user_style:
+  controller: App\Controller\CustomStyleController::userCustomStyle
+  path: /customstyle/user.css
+  methods: [ GET ]
+  stateless: true

@@ -1,0 +1,30 @@
+@import 'fonts/novecento';
+
+#header {
+  text-transform: uppercase;
+  font-family: "Novecento Sans Wide", var(--kbin-body-font-family);
+
+  .user-name {
+    height: 1rem;
+  }
+
+  .dropdown__menu {
+    text-transform: none;
+    font-family: var(--kbin-body-font-family);
+  }
+}
+
+#sidebar {
+  .section {
+    h1, h2, h3, h4, h5, h6 {
+      text-transform: uppercase;
+      font-family: "Novecento Sans Wide", var(--kbin-body-font-family);
+      font-weight: 600;
+    }
+  }
+
+  .intro .container h3 {
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+}

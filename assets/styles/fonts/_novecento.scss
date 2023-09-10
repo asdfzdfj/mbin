@@ -1,0 +1,53 @@
+@mixin novecento-options {
+  font-display: swap;
+  font-feature-settings: "case" 1, "zero" 1;
+  ascent-override: 90%;
+}
+
+@font-face {
+    font-family: 'Novecento Sans Wide';
+    src: url('../../fonts/novecento/Novecentosanswide-Light.otf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+    @include novecento-options;
+}
+
+@font-face {
+    font-family: 'Novecento Sans Wide';
+    src: url('../../fonts/novecento/Novecentosanswide-Book.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    @include novecento-options;
+}
+
+@font-face {
+    font-family: 'Novecento Sans Wide';
+    src: url('../../fonts/novecento/Novecentosanswide-Normal.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    @include novecento-options;
+}
+
+@font-face {
+    font-family: 'Novecento Sans Wide';
+    src: url('../../fonts/novecento/Novecentosanswide-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    @include novecento-options;
+}
+
+@font-face {
+    font-family: 'Novecento Sans Wide';
+    src: url('../../fonts/novecento/Novecentosanswide-DemiBold.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+    @include novecento-options;
+}
+
+@font-face {
+    font-family: 'Novecento Sans Wide';
+    src: url('../../fonts/novecento/Novecentosanswide-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    @include novecento-options;
+}

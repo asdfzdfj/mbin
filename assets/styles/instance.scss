@@ -1,5 +1,9 @@
 @import 'fonts/novecento';
 
+button, select {
+    font-family: inherit;
+}
+
 #header {
   text-transform: uppercase;
   font-family: "Novecento Sans Wide", var(--kbin-body-font-family);

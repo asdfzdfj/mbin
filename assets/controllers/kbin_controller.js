@@ -4,6 +4,8 @@ import {ApplicationController, useDebounce} from 'stimulus-use'
 export default class extends ApplicationController {
     static values = {
         loading: Boolean,
+        defaultDarkTheme: { type: String, default: 'dark' },
+        defaultLightTheme: { type: String, default: 'light' },
     }
 
     static debounces = ['mention']
@@ -52,7 +54,10 @@ export default class extends ApplicationController {
             return;
         }
 
-        let preferredTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        let preferredTheme = window.matchMedia
+            && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? this.defaultDarkThemeValue
+                : this.defaultLightThemeValue;
 
         const now = new Date();
         const expireTime = now.getTime() + 60 * 60 * 1000;
@@ -65,9 +70,9 @@ export default class extends ApplicationController {
 
     /**
      * Handles interaction with the mobile nav button, opening the sidebar
-     * @param {*} e 
+     * @param {*} e
      */
-    handleNavToggleClick(e) {      
+    handleNavToggleClick(e) {
         const sidebar = document.getElementById('sidebar');
         sidebar.classList.toggle('open');
     }

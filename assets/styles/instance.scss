@@ -5,8 +5,7 @@ button, select {
 }
 
 #header {
-  text-transform: uppercase;
-  font-family: "Novecento Sans Wide", var(--kbin-body-font-family);
+  @include novecento-font;
   font-weight: 500;
 
   .brand, {
@@ -27,8 +26,7 @@ button, select {
 #sidebar {
   .section {
     h1, h2, h3, h4, h5, h6 {
-      text-transform: uppercase;
-      font-family: "Novecento Sans Wide", var(--kbin-body-font-family);
+      @include novecento-font;
       font-weight: 600;
     }
   }
@@ -38,4 +36,13 @@ button, select {
     font-weight: 500;
     text-transform: uppercase;
   }
+}
+
+.entry--single header {
+  @include novecento-font;
+}
+
+#footer section h5 {
+  @include novecento-font;
+  font-weight: 600;
 }

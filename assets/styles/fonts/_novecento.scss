@@ -3,6 +3,11 @@
   font-feature-settings: "case" 1, "zero" 1;
 }
 
+@mixin novecento-font {
+  font-family: "Novecento Sans Wide", var(--kbin-body-font-family);
+  text-transform: uppercase;
+}
+
 @font-face {
     font-family: 'Novecento Sans Wide';
     src: url('../../fonts/novecento/transfont/Novecentosanswide-Light.woff2') format('woff2'),

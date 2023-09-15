@@ -12,9 +12,12 @@ button, select {
     font-weight: 500;
   }
 
-  .user-name {
-    height: 1rem;
+  .login {
     font-weight: 500;
+
+    span {
+      height: 1rem;
+    }
   }
 
   .dropdown__menu {

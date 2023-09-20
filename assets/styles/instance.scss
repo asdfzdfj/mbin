@@ -32,6 +32,15 @@ button, select {
       @include novecento-font;
       font-weight: 600;
     }
+
+  }
+
+  #settings, #federation {
+    strong {
+      @include novecento-font;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
   }
 
   .intro .container h3,

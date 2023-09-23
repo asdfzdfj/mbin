@@ -1,0 +1,17 @@
+.glightbox-clean {
+  .gslide-description {
+    font-family: var(--kbin-body-font-family);
+    background: var(--kbin-body-bg);
+  }
+
+  .gdesc-inner {
+    padding: 1rem;
+  }
+
+  .gslide-title,
+  .gslide-desc {
+    font-family: var(--kbin-body-font-family);
+    font-size: 0.9rem;
+  }
+}
+

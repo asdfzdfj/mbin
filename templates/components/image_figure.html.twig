@@ -1,0 +1,16 @@
+{% with {thumb_desc_class: 'thumb-desc-' ~ image.id} %}
+<figure>
+    <a class="thumb"
+        href="{{ uploaded_asset(image.filePath) }}"
+        data-description="{{ image.altText ? '.'~thumb_desc_class : ''}}">
+        <img class="thumb-subject"
+             src="{{ asset(image.filePath)|imagine_filter('post_thumb') }}"
+             alt="{{ image.altText }}">
+        {% if image.altText %}
+            <div class="{{ html_classes('hidden', 'glightbox-desc', thumb_desc_class) }}">
+                {{ image.altText|nl2br }}
+            </div>
+        {% endif %}
+    </a>
+</figure>
+{% endwith %}

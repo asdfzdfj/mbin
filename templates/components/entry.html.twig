@@ -94,12 +94,21 @@
                             <div class="image-filler"
                                  style="background-image: url({{ asset(entry.image.filePath) |imagine_filter('entry_thumb') }})"
                                  aria-hidden="true"></div>
-                            <a href="{{ is_route_name('entry_single') ? uploaded_asset(entry.image.filePath) : entry_url(entry) }}"
-                               class="{{ html_classes({'thumb': is_route_name('entry_single')}) }}">
-                                <img class="thumb-subject"
-                                     src="{{ asset(entry.image.filePath) |imagine_filter('entry_thumb') }}"
-                                     alt="{{ entry.image.altText }}">
-                            </a>
+                            {% with {is_entry_single: is_route_name('entry_single'), thumb_desc_class: 'thumb-desc-' ~ entry.image.id} %}
+                                <a href="{{ is_entry_single ? uploaded_asset(entry.image.filePath) : entry_url(entry) }}"
+                                   class="{{ html_classes({'thumb': is_entry_single}) }}">
+                                    <img class="thumb-subject"
+                                         data-description="{{ (is_entry_single and entry.image.altText) ? '.'~thumb_desc_class : ''}}"
+                                         src="{{ asset(entry.image.filePath) |imagine_filter('entry_thumb') }}"
+                                         alt="{{ entry.image.altText }}">
+                                    {% if is_entry_single and entry.image.altText %}
+                                        <div class="{{ html_classes('hidden', 'glightbox-desc', thumb_desc_class) }}"
+                                             aria-hidden="true">
+                                            {{ entry.image.altText|nl2br }}
+                                        </div>
+                                    {% endif %}
+                                </a>
+                            {% endwith %}
                         </figure>
                     {% endif %}
                 {% else %}

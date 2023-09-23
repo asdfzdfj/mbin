@@ -51,13 +51,7 @@
             {% endif %}
             <footer>
                 {% if post.image %}
-                    <figure>
-                        <a class="thumb" href="{{ uploaded_asset(post.image.filePath) }}">
-                            <img class="thumb-subject"
-                                 src="{{ asset(post.image.filePath) |imagine_filter('post_thumb') }}"
-                                 alt="{{ post.image.altText }}">
-                        </a>
-                    </figure>
+                    {% include 'components/image_figure.html.twig' with {image: post.image} %}
                 {% endif %}
                 {% if post.visibility in ['visible', 'private'] %}
                     <menu>

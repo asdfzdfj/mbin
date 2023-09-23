@@ -53,14 +53,7 @@
             {% endif %}
             <footer>
                 {% if (comment.visibility in ['visible', 'private'] or comment.visibility is same as 'trashed' and this.canSeeTrashed) and comment.image %}
-                    <figure>
-                        <a href="{{ uploaded_asset(comment.image.filePath) }}"
-                           class="thumb">
-                            <img class="thumb-subject"
-                                 src="{{ asset(comment.image.filePath) |imagine_filter('post_thumb') }}"
-                                 alt="{{ comment.image.altText }}">
-                        </a>
-                    </figure>
+                    {% include 'components/image_figure.html.twig' with {image: comment.image} %}
                 {% endif %}
                 {% if comment.visibility in ['visible', 'private'] %}
                     <menu>

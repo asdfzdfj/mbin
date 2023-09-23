@@ -51,7 +51,7 @@
             {% endif %}
             <footer>
                 {% if post.image %}
-                    {% include 'components/image_figure.html.twig' with {image: post.image} %}
+                    {% include 'components/_image_figure.html.twig' with {image: post.image} %}
                 {% endif %}
                 {% if post.visibility in ['visible', 'private'] %}
                     <menu>

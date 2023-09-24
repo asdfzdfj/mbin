@@ -27,8 +27,14 @@ export default class extends Controller {
             container.style.display = 'none';
             this.element.insertAdjacentHTML('afterend', container.outerHTML);
         } else {
-            if (container.querySelector('.preview')) {
-                container.querySelector('.preview').remove();
+            let previewContainer = container.querySelector('.preview');
+
+            if (previewContainer) {
+                let previewLink = previewContainer.closest('.embed-link');
+                if (previewLink) {
+                    previewLink.remove();
+                }
+                previewContainer.remove();
                 if (0 === container.children.length) {
                     container.remove();
                 }

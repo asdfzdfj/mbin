@@ -9,7 +9,6 @@ use Embed\Embed as BaseEmbed;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
-
 class EmbedFetcher
 {
     public function __construct(
@@ -31,8 +30,14 @@ class EmbedFetcher
             function (ItemInterface $item) use ($url): Embed {
                 $item->expiresAfter(3600);
 
+                // workaround: the embed extractor part doesn't seems to update its data properly if the url redirects
+                // the crawler follows redirects fine, so refetch embed again with (hopefully) resolved url
                 try {
-                    $embed = (new BaseEmbed())->get($url);
+                    $fetcher = new BaseEmbed();
+                    $embed = $fetcher->get($url);
+                    if ($url !== (string) $embed->url && $embed->getResponse()->getHeaderLine('Location')) {
+                        $embed = $fetcher->get((string) $embed->url);
+                    }
                     $oembed = $embed->getOEmbed();
                 } catch (\Exception $e) {
                     $this->logger->debug('EmbedFetcher: fetch fail: '.$e->getMessage(), [
@@ -42,7 +47,7 @@ class EmbedFetcher
                     return new Embed();
                 }
 
-                $c = new Embed(
+                $data = new Embed(
                     (string) $embed->url,
                     $embed->title,
                     $embed->description,
@@ -50,20 +55,20 @@ class EmbedFetcher
                 );
 
                 if ($oembed->html('html')) {
-                    $c->html = $this->cleanIframe($oembed->html('html'));
-                } elseif (!$c->html && $embed->code) {
-                    $c->html = $this->cleanIframe($embed->code->html);
+                    $data->html = $this->cleanIframe($oembed->html('html'));
+                } elseif (!$data->html && $embed->code) {
+                    $data->html = $this->cleanIframe($embed->code->html);
                 }
 
                 $this->logger->debug('EmbedFetcher: fetch success: ', [
-                    'url' => ['in' => $url, 'out' => $c->url],
-                    'title' => $c->title,
-                    'description' => $c->description,
-                    'image' => $c->image,
-                    'html' => $this->firstTag($c->html),
+                    'url' => ['in' => $url, 'out' => $data->url],
+                    'title' => $data->title,
+                    'description' => $data->description,
+                    'image' => $data->image,
+                    'html' => $this->firstTag($data->html),
                 ]);
 
-                return $c;
+                return $data;
             }
         );
     }

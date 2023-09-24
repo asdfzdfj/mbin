@@ -18,7 +18,7 @@ use App\Repository\NotificationRepository;
 use App\Repository\PostCommentRepository;
 use App\Repository\UserRepository;
 use App\Service\UserNoteManager;
-use App\Utils\Embed;
+use App\Utils\EmbedFetcher;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -27,16 +27,16 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AjaxController extends AbstractController
 {
-    public function fetchTitle(Embed $embed, Request $request): JsonResponse
+    public function fetchTitle(EmbedFetcher $embed, Request $request): JsonResponse
     {
         $url = json_decode($request->getContent())->url;
-        $embed = $embed->fetch($url);
+        $data = $embed->fetch($url);
 
         return new JsonResponse(
             [
-                'title' => $embed->title,
-                'description' => $embed->description,
-                'image' => $embed->image,
+                'title' => $data->title,
+                'description' => $data->description,
+                'image' => $data->image,
             ]
         );
     }
@@ -57,7 +57,7 @@ class AjaxController extends AbstractController
     /**
      * Returns an embeded objects html value, to be used for front-end insertion.
      */
-    public function fetchEmbed(Embed $embed, Request $request): JsonResponse
+    public function fetchEmbed(EmbedFetcher $embed, Request $request): JsonResponse
     {
         $data = $embed->fetch($request->get('url'));
 

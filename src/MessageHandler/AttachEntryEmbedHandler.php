@@ -11,6 +11,7 @@ use App\Repository\EntryRepository;
 use App\Repository\ImageRepository;
 use App\Service\ImageManager;
 use App\Utils\Embed;
+use App\Utils\EmbedFetcher;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
@@ -20,7 +21,7 @@ class AttachEntryEmbedHandler
 {
     public function __construct(
         private readonly EntryRepository $entryRepository,
-        private readonly Embed $embed,
+        private readonly EmbedFetcher $embed,
         private readonly ImageManager $manager,
         private readonly ImageRepository $imageRepository,
         private readonly EntityManagerInterface $entityManager

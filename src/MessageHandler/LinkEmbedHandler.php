@@ -6,7 +6,7 @@ namespace App\MessageHandler;
 
 use App\Message\LinkEmbedMessage;
 use App\Repository\EmbedRepository;
-use App\Utils\Embed;
+use App\Utils\EmbedFetcher;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -17,7 +17,7 @@ class LinkEmbedHandler
 {
     public function __construct(
         private readonly EmbedRepository $embedRepository,
-        private readonly Embed $embed,
+        private readonly EmbedFetcher $embed,
         private readonly CacheItemPoolInterface $markdownCache,
         private EntityManagerInterface $entityManager,
     ) {

@@ -55,9 +55,9 @@ class EmbedFetcher
                 );
 
                 if ($oembed->html('html')) {
-                    $data->html = $this->cleanIframe($oembed->html('html'));
+                    $data->useHTML($oembed->html('html'));
                 } elseif (!$data->html && $embed->code) {
-                    $data->html = $this->cleanIframe($embed->code->html);
+                    $data->useHTML($embed->code->html);
                 }
 
                 $this->logger->debug('EmbedFetcher: fetch success: ', [
@@ -78,14 +78,5 @@ class EmbedFetcher
         preg_match('/^<[^>]+>/', $html ?? '', $firstTag);
 
         return $firstTag[0] ?? '';
-    }
-
-    private function cleanIframe(?string $html): ?string
-    {
-        if (!$html || str_contains($html, 'wp-embedded-content')) {
-            return null;
-        }
-
-        return $html;
     }
 }

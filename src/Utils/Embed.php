@@ -18,6 +18,11 @@ class Embed
     ) {
     }
 
+    public function useHTML(?string $html)
+    {
+        $this->html = $this->cleanIframe($html);
+    }
+
     public function getType(): string
     {
         if ($this->isImageUrl()) {
@@ -59,5 +64,14 @@ class Embed
             || str_contains($this->html, 'youtube')
             || str_contains($this->html, 'vimeo')
             || str_contains($this->html, 'streamable'); // @todo
+    }
+
+    private function cleanIframe(?string $html): ?string
+    {
+        if (!$html || str_contains($html, 'wp-embedded-content')) {
+            return null;
+        }
+
+        return $html;
     }
 }

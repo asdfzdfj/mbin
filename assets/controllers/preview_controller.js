@@ -30,10 +30,6 @@ export default class extends Controller {
             let previewContainer = container.querySelector('.preview');
 
             if (previewContainer) {
-                let previewLink = previewContainer.closest('.embed-link');
-                if (previewLink) {
-                    previewLink.remove();
-                }
                 previewContainer.remove();
                 if (0 === container.children.length) {
                     container.remove();

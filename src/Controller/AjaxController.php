@@ -63,7 +63,11 @@ class AjaxController extends AbstractController
 
         return new JsonResponse(
             [
-                'html' => sprintf('<a href="%s" class="embed-link"><div class="preview">%s</div></a>', $data->url, $data->html),
+                'html' => sprintf(
+                    '<div class="preview"><a href="%s" class="embed-link">%s</a></div>',
+                    $data->url,
+                    $data->html
+                ),
             ]
         );
     }

@@ -9,11 +9,14 @@ use Embed\Embed as BaseEmbed;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
 class EmbedFetcher
 {
     public function __construct(
         private CacheInterface $cache,
         private SettingsManager $settings,
+        private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
     ) {
     }
@@ -30,17 +33,25 @@ class EmbedFetcher
             function (ItemInterface $item) use ($url): Embed {
                 $item->expiresAfter(3600);
 
-                // workaround: the embed extractor part doesn't seems to update its data properly if the url redirects
-                // the crawler follows redirects fine, so refetch embed again with (hopefully) resolved url
+                // workaround: the embed extractor part doesn't seems to update its data properly
+                // if the url redirects, resolve the url first before fetching embed
                 try {
-                    $fetcher = new BaseEmbed();
-                    $embed = $fetcher->get($url);
-                    if ($url !== (string) $embed->url && $embed->getResponse()->getHeaderLine('Location')) {
-                        $embed = $fetcher->get((string) $embed->url);
+                    $resp = $this->httpClient->request('GET', $url);
+                    $resp->getHeaders();
+                    $resp->cancel();
+                    $resolvedUrl = $resp->getInfo('url');
+
+                    if ($resp->getInfo('redirect_count')) {
+                        $this->logger->debug('EmbedFetcher:fetch: redirected:', [
+                            $url => $resolvedUrl,
+                        ]);
                     }
+
+                    $fetcher = new BaseEmbed();
+                    $embed = $fetcher->get($resolvedUrl);
                     $oembed = $embed->getOEmbed();
                 } catch (\Exception $e) {
-                    $this->logger->debug('EmbedFetcher: fetch fail: '.$e->getMessage(), [
+                    $this->logger->debug('EmbedFetcher:fetch: fetch fail: '.$e->getMessage(), [
                         'url' => $url,
                     ]);
 
@@ -56,11 +67,11 @@ class EmbedFetcher
 
                 if ($oembed->html('html')) {
                     $data->useHTML($oembed->html('html'));
-                } elseif (!$data->html && $embed->code) {
+                } elseif ($embed->code) {
                     $data->useHTML($embed->code->html);
                 }
 
-                $this->logger->debug('EmbedFetcher: fetch success: ', [
+                $this->logger->debug('EmbedFetcher:fetch: fetch success: ', [
                     'url' => ['in' => $url, 'out' => $data->url],
                     'title' => $data->title,
                     'description' => $data->description,

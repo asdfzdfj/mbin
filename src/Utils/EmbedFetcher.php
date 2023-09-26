@@ -36,7 +36,10 @@ class EmbedFetcher
                 // workaround: the embed extractor part doesn't seems to update its data properly
                 // if the url redirects, resolve the url first before fetching embed
                 try {
-                    $resp = $this->httpClient->request('GET', $url);
+                    $resp = $this->httpClient->request('GET', $url, [
+                        'timeout' => 5,
+                        'max_duration' => 10,
+                    ]);
                     $resp->getHeaders();
                     $resp->cancel();
                     $resolvedUrl = $resp->getInfo('url');

@@ -60,14 +60,22 @@ class AjaxController extends AbstractController
     public function fetchEmbed(EmbedFetcher $embed, Request $request): JsonResponse
     {
         $data = $embed->fetch($request->get('url'));
+        if ($data->isImageUrl()) {
+            $html = sprintf(
+                '<div class="preview"><a href="%s" class="embed-link">%s</a></div>',
+                $data->url,
+                $data->html
+            );
+        } else {
+            $html = sprintf(
+                '<div class="preview">%s</div>',
+                $data->html
+            );
+        }
 
         return new JsonResponse(
             [
-                'html' => sprintf(
-                    '<div class="preview"><a href="%s" class="embed-link">%s</a></div>',
-                    $data->url,
-                    $data->html
-                ),
+                'html' => $html
             ]
         );
     }

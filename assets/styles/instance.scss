@@ -32,7 +32,11 @@ button, select {
       @include novecento-font;
       font-weight: 600;
     }
+  }
 
+  .mobile-nav .head-title {
+    @include novecento-font;
+    font-weight: 600;
   }
 
   #settings, #federation {

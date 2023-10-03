@@ -6,11 +6,11 @@
         <img class="thumb-subject"
              src="{{ asset(image.filePath)|imagine_filter('post_thumb') }}"
              alt="{{ image.altText }}">
-        {% if image.altText %}
-            <div class="{{ html_classes('hidden', 'glightbox-desc', thumb_desc_class) }}">
-                {{ image.altText|nl2br }}
-            </div>
-        {% endif %}
     </a>
+    {% if image.altText %}
+        <figcaption class="{{ html_classes('hidden', 'glightbox-desc', thumb_desc_class) }}">
+            {{ image.altText|nl2br }}
+        </figcaption>
+    {% endif %}
 </figure>
 {% endwith %}

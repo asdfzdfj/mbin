@@ -37,3 +37,12 @@
         </div>
     </header>
 {% endblock %}
+
+{% block swagger_initialization %}
+    <script type="text/javascript" nonce="{{ csp_nonce('script') }}">
+        (function () {
+            var swaggerUI = {{ swagger_ui_config|json_encode(65)|raw }};
+            window.onload = loadSwaggerUI(swaggerUI);
+        })();
+    </script>
+{% endblock swagger_initialization %}

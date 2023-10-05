@@ -101,13 +101,13 @@
                                          data-description="{{ (is_entry_single and entry.image.altText) ? '.'~thumb_desc_class : ''}}"
                                          src="{{ asset(entry.image.filePath) |imagine_filter('entry_thumb') }}"
                                          alt="{{ entry.image.altText }}">
-                                    {% if is_entry_single and entry.image.altText %}
-                                        <div class="{{ html_classes('hidden', 'glightbox-desc', thumb_desc_class) }}"
-                                             aria-hidden="true">
-                                            {{ entry.image.altText|nl2br }}
-                                        </div>
-                                    {% endif %}
                                 </a>
+                                {% if is_entry_single and entry.image.altText %}
+                                    <figcaption class="{{ html_classes('hidden', 'glightbox-desc', thumb_desc_class) }}"
+                                         aria-hidden="true">
+                                        {{ entry.image.altText|nl2br }}
+                                    </figcaption>
+                                {% endif %}
                             {% endwith %}
                         </figure>
                     {% endif %}

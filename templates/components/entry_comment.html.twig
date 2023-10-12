@@ -20,9 +20,9 @@
                 'show-preview': SHOW_PREVIEW is same as V_TRUE and not comment.isAdult
             })}).without('id') }}
                 id="entry-comment-{{ comment.id }}"
-                data-controller="comment subject mentions"
+                data-controller="comment subject mentions comment-collapse"
                 data-subject-parent-value="{{ comment.parent ? comment.parent.id : '' }}"
-                data-action="{{- DYNAMIC_LISTS is same as V_TRUE ? 'notifications:Notification@window->subject#notification' : '' -}}">
+                data-action="{{- DYNAMIC_LISTS is same as V_TRUE ? 'notifications:Notification@window->subject#notification' : '' -}} comment-collapse:toggleHideSibling->comment-collapse#toggleHideSelf">
             <header>
                 {% if comment.isAdult %}<span class="badge danger">18+</span>{% endif %}
                 {{ component('user_inline', {user: comment.user, showAvatar: false}) }}
@@ -85,7 +85,8 @@
                     }) }}
                 {% endif %}
                 {% if comment.visibility in ['visible', 'private'] %}
-                    <menu>
+                    <div class="menubar">
+                    <menu class="action">
                         <li>
                             <a class="stretched-link"
                                href="{{ entry_comment_create_url(comment) }}#add-comment"
@@ -101,8 +102,27 @@
                             </div>
                         </li>
                     </menu>
+                    <menu class="collapse">
+                        {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW'), 'tree') is same as constant('App\\Controller\\User\\ThemeSettingsController::TREE') %}
+                            <li class="collapsed--toggle"
+                                data-comment-collapse-target="collapse">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    {{ 'collapse'|trans|lower }}
+                                </a>
+                            </li>
+                            <li class="collapsed--toggle hidden"
+                                data-comment-collapse-target="expand">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    <span data-comment-collapse-target="count"></span> {{ 'expand'|trans|lower }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    </menu>
+                    </div>
                 {% elseif(comment.visibility is same as 'trashed' and this.canSeeTrashed) %}
-                    <menu>
+                    <menu class="action">
                         <li>
                             <form method="post"
                                   action="{{ path('entry_comment_restore', {magazine_name: comment.magazine.name, entry_id: comment.entry.id, comment_id: comment.id}) }}"
@@ -126,7 +146,7 @@
                         </li>
                     </menu>
                 {% endif %}
-                <div data-subject-target="container" class="js-container">
+                <div data-subject-target="container" class="js-container hidden">
                 </div>
             </footer>
         </blockquote>

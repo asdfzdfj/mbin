@@ -177,6 +177,18 @@ $comment-margin-sm: .3rem;
       @include fade-in(.5s, .75);
     }
   }
+
+  &.hidden {
+    display: none;
+  }
+
+  &.collapsed {
+    .content,
+    .aside,
+    footer figure {
+      display: none;
+    }
+  }
 }
 
 .post-comments {

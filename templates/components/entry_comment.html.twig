@@ -14,6 +14,7 @@
                 id="entry-comment-{{ comment.id }}"
                 data-controller="comment subject mentions"
                 data-subject-parent-value="{{ comment.parent ? comment.parent.id : '' }}"
+                data-comment-collapse-depth-value="{{ this.level }}"
                 data-action="{{- app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_DYNAMIC_LISTS')) is same as 'true' ? 'notifications:Notification@window->subject#notification' : '' -}}">
             <header>
                 {% if comment.isAdult %}<span class="badge danger">18+</span>{% endif %}

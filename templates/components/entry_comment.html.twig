@@ -12,7 +12,7 @@
                 'show-preview': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_SHOW_PREVIEW')) is same as 'true',
             })}).without('id') }}
                 id="entry-comment-{{ comment.id }}"
-                data-controller="comment subject mentions"
+                data-controller="comment subject mentions comment-collapse"
                 data-subject-parent-value="{{ comment.parent ? comment.parent.id : '' }}"
                 data-comment-collapse-depth-value="{{ this.level }}"
                 data-action="{{- app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_DYNAMIC_LISTS')) is same as 'true' ? 'notifications:Notification@window->subject#notification' : '' -}}">
@@ -52,6 +52,28 @@
             {% if comment.visibility in ['visible', 'private'] %}
                 {{ component('vote', {subject: comment}) }}
             {% endif %}
+            <aside class="collapse">
+                <menu>
+                {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW'), 'tree')
+                is same as constant('App\\Controller\\User\\ThemeSettingsController::TREE') %}
+                <li class="collapsed--toggle"
+                    data-comment-collapse-target="collapse">
+                    <a class="stretched-link"
+                       data-action="comment-collapse#toggleCollapse:prevent">
+                        {{ 'collapse'|trans|lower }}
+                    </a>
+                </li>
+                <li class="collapsed--toggle hidden"
+                    data-comment-collapse-target="expand">
+                    <a class="stretched-link"
+                       data-action="comment-collapse#toggleCollapse:prevent">
+                        {{ 'expand'|trans|lower }}
+                        <span data-comment-collapse-target="count"></span>
+                    </a>
+                </li>
+                {% endif %}
+                </menu>
+            </aside>
             <footer>
                 {% if (comment.visibility in ['visible', 'private'] or comment.visibility is same as 'trashed' and this.canSeeTrashed) and comment.image %}
                     <figure>

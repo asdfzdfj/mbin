@@ -29,7 +29,7 @@ $comment-margin-sm: .3rem;
   grid-gap: .5rem;
   grid-template-areas: "avatar header vote"
                          "avatar body body"
-                         "avatar footer footer";
+                         "avatar footer collapse";
   grid-template-columns: min-content auto min-content;
   margin: .5rem 0;
   padding: 0.5rem 0.75rem;
@@ -39,7 +39,7 @@ $comment-margin-sm: .3rem;
   @include media-breakpoint-down(sm) {
     grid-template-areas: "avatar header vote"
                          "body body body"
-                         "footer footer footer";
+                         "footer footer collapse";
   }
 
   &:hover,
@@ -69,8 +69,12 @@ $comment-margin-sm: .3rem;
     }
   }
 
-  aside {
+  aside.vote {
     grid-area: vote;
+  }
+
+  aside.collapse {
+    grid-area: collapse;
   }
 
   div {
@@ -115,7 +119,7 @@ $comment-margin-sm: .3rem;
     z-index: 4;
 
     & > a.active,
-    & > li button.active, {
+    & > li button.active {
       text-decoration: underline;
     }
 
@@ -182,11 +186,60 @@ $comment-margin-sm: .3rem;
     display: none;
   }
 
+  .collapse {
+    display: flex;
+    justify-content: flex-end;
+
+    li.collapsed--toggle {
+      display: block;
+
+      &.hidden {
+        display: none;
+      }
+    }
+  }
+
   &.collapsed {
-    .content,
-    .aside,
-    footer figure {
+    border-style: dashed;
+    grid-template-areas:
+      "avatar header collapse"
+      "avatar footer collapse";
+    grid-template-columns: min-content auto min-content;
+
+    header {
+      color: var(--kbin-text-muted-color);
+
+      a {
+        color: var(--kbin-text-muted-color);
+      }
+    }
+
+    .content, .vote {
       display: none;
+    }
+
+    footer {
+      a {
+        color: var(--kbin-text-muted-color);
+      }
+
+      figure, menu {
+        display: none;
+      }
+
+      //menu {
+      //  li {
+      //    display: none;
+      //  }
+
+      //  li.collapsed--toggle {
+      //    display: block;
+
+      //    &.hidden {
+      //      display: none;
+      //    }
+      //  }
+      //}
     }
   }
 }

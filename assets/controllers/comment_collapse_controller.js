@@ -72,7 +72,7 @@ export default class extends Controller {
         this.collapseTarget.classList.add(HIDDEN_CLASS);
         this.expandTarget.classList.remove(HIDDEN_CLASS);
         if (count > 0) {
-            this.countTarget.innerText = ` (${count})`;
+            this.countTarget.innerText = `(${count}) `;
         }
     }
 }

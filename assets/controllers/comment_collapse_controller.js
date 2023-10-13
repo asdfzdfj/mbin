@@ -1,23 +1,19 @@
 import { Controller } from '@hotwired/stimulus';
 
-const CONTROLLER_ELEMENT_NAME = 'commentCollapseController';
+const COMMENT_DEPTH_VALUE_NAME = 'commentCollapseDepthValue';
 const COMMENT_ELEMENT_TAG = 'blockquote';
 const COLLAPSED_CLASS = 'collapsed';
-const HIDDEN_CLASS = 'hidden';
+const HIDDEN_CLASS = 'hidden'
+const HIDDEN_EVENT = 'toggleHideSibling';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
     static values = {
         depth: Number,
-        collapsedDepth: Number,
+        collapsed: Number,
+        hiddenBy: Number,
     };
     static targets = ['collapse', 'expand', 'count'];
-
-    connect() {
-        // ugly hack to expose this controller instance for parent comment
-        // to use when collapsing comments
-        this.element[CONTROLLER_ELEMENT_NAME] = this;
-    }
 
     // main entrypoint, use this in action
     toggleCollapse(event) {
@@ -26,41 +22,64 @@ export default class extends Controller {
             (nextSibling && COMMENT_ELEMENT_TAG.toUpperCase() === nextSibling.tagName);
             nextSibling = nextSibling.nextElementSibling, siblingCount++
         ) {
-            let nextController = nextSibling[CONTROLLER_ELEMENT_NAME];
-            if (!nextController || nextController.depthValue <= this.depthValue) {
+            let siblingDepth = nextSibling.dataset[COMMENT_DEPTH_VALUE_NAME];
+            if (!siblingDepth || siblingDepth <= this.depthValue) {
                 break;
             }
 
-            nextController.toggleHideComment(this.depthValue);
+            this.toggleHideSibling(nextSibling, this.depthValue);
         }
 
         this.toggleCollapseSelf(siblingCount);
     }
 
-    // this function is only meant to be called from parent comment controller
-    // to collapse child comment
-    toggleHideComment(collapserDepth) {
-        if (!this.hasCollapsedDepthValue) {
-            this.collapsedDepthValue = collapserDepth;
-        } else if (this.collapsedDepthValue === collapserDepth) {
-            this.collapsedDepthValue = undefined;
+    // signals sibling comment element to hide itself
+    toggleHideSibling(commentElement, collapserDepth) {
+        commentElement.dispatchEvent(
+            new CustomEvent(`${this.identifier}:${HIDDEN_EVENT}`, {
+                detail: { collapserDepth }
+            })
+        );
+    }
+
+    // put itself into hidden state
+    toggleHideSelf({ detail: { collapserDepth }}) {
+        if (!this.hasHiddenByValue) {
+            this.hiddenByValue = collapserDepth;
+        } else if (this.hiddenByValue === collapserDepth) {
+            this.hiddenByValue = undefined;
         }
     }
 
-    collapsedDepthValueChanged() {
-        if (this.hasCollapsedDepthValue) {
+    // put itself into collapsed state
+    toggleCollapseSelf(count) {
+        if (!this.hasCollapsedValue) {
+            this.collapsedValue = count;
+        } else {
+            this.collapsedValue = undefined;
+        }
+    }
+
+    // using value changed callback to enforce proper state appearance
+
+    // existence of hidden-by value means this comment is in hidden state
+    // (basically display: none)
+    hiddenByValueChanged() {
+        if (this.hasHiddenByValue) {
             this.element.classList.add(HIDDEN_CLASS);
         } else {
             this.element.classList.remove(HIDDEN_CLASS);
         }
     }
 
-    toggleCollapseSelf(count) {
-        this.element.classList.toggle(COLLAPSED_CLASS);
-
-        if (this.element.classList.contains(COLLAPSED_CLASS)) {
-            this.showExpandButton(count);
+    // existence of collapsed value means this comment is in collapsed state
+    // (visually dimmed, content hidden, expand button shown)
+    collapsedValueChanged() {
+        if (this.hasCollapsedValue) {
+            this.element.classList.add(COLLAPSED_CLASS);
+            this.showExpandButton(this.collapsedValue);
         } else {
+            this.element.classList.remove(COLLAPSED_CLASS);
             this.showCollapsedButton();
         }
     }

@@ -18,7 +18,7 @@
                 data-controller="comment subject mentions comment-collapse"
                 data-subject-parent-value="{{ comment.parent ? comment.parent.id : '' }}"
                 data-comment-collapse-depth-value="{{ this.level }}"
-                data-action="notifications:Notification@window->subject#notification">
+                data-action="notifications:Notification@window->subject#notification comment-collapse:toggleHideSibling->comment-collapse#toggleHideSelf">
             <header>
                 {% if comment.isAdult %}<span class="badge danger">18+</span>{% endif %}
                 {{ component('user_inline', {user: comment.user, showAvatar: false}) }},

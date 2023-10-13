@@ -14,7 +14,8 @@ export default class extends Controller {
     static targets = ['collapse', 'expand', 'count'];
 
     connect() {
-        // ugly hack to expose this controller instance for parent comment controller to use when collapsing child comments
+        // ugly hack to expose this controller instance for parent comment
+        // to use when collapsing comments
         this.element[CONTROLLER_ELEMENT_NAME] = this;
     }
 
@@ -36,12 +37,12 @@ export default class extends Controller {
         this.toggleCollapseSelf(siblingCount);
     }
 
-    // this function is meant to be called from parent comment controller
-    // to collapse comment
+    // this function is only meant to be called from parent comment controller
+    // to collapse child comment
     toggleHideComment(collapserDepth) {
         if (!this.hasCollapsedDepthValue) {
             this.collapsedDepthValue = collapserDepth;
-        } else if (this.hasCollapsedDepthValue && this.collapsedDepthValue === collapserDepth) {
+        } else if (this.collapsedDepthValue === collapserDepth) {
             this.collapsedDepthValue = undefined;
         }
     }

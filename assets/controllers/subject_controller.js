@@ -56,7 +56,7 @@ export default class extends Controller {
             response = await ok(response);
             response = await response.json();
 
-            this.containerTarget.style.display = 'block';
+            this.containerTarget.classList.remove('hidden');
             this.containerTarget.innerHTML = response.form;
 
             const textarea = this.containerTarget.querySelector('textarea');
@@ -106,7 +106,7 @@ export default class extends Controller {
             response = await response.json();
 
             if (response.form) {
-                this.containerTarget.style.display = 'block';
+                this.containerTarget.classList.remove('hidden');
                 this.containerTarget.innerHTML = response.form;
             } else if (form.classList.contains('replace')) {
                 const div = document.createElement('div');
@@ -129,7 +129,7 @@ export default class extends Controller {
                     this.element.parentNode.insertBefore(div.firstElementChild, this.element.nextSibling);
                 }
 
-                this.containerTarget.style.display = 'none';
+                this.containerTarget.classList.add('hidden');
                 this.containerTarget.innerHTML = '';
             }
         } catch (e) {
@@ -289,6 +289,8 @@ export default class extends Controller {
             div.innerHTML = response.html;
 
             div.firstElementChild.className = this.element.className;
+            setCommentDepth(div.firstElementChild, getDepth(this.element));
+
             this.element.outerHTML = div.firstElementChild.outerHTML;
         } catch (e) {
         } finally {

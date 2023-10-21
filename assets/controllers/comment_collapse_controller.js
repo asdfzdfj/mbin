@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { getLevel } from '../utils/kbin';
 
 const COMMENT_DEPTH_VALUE_NAME = 'commentCollapseDepthValue';
 const COMMENT_ELEMENT_TAG = 'blockquote';
@@ -14,6 +15,16 @@ export default class extends Controller {
         hiddenBy: Number,
     };
     static targets = ['collapse', 'expand', 'count'];
+
+    connect() {
+        // derive depth value if it doesn't exist
+        // or when attached depth is 1 but css depth says otherwise (trying to handle dynamic list)
+        let cssLevel = getLevel(this.element);
+        if (!this.hasDepthValue
+            || (1 === this.depthValue && cssLevel > this.depthValue)) {
+            this.depthValue = cssLevel;
+        }
+    }
 
     // main entrypoint, use this in action
     toggleCollapse(event) {

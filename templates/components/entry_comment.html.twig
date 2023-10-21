@@ -52,27 +52,6 @@
             {% if comment.visibility in ['visible', 'private'] %}
                 {{ component('vote', {subject: comment}) }}
             {% endif %}
-            <aside class="collapse">
-                <menu>
-                {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW'), 'tree')
-                is same as constant('App\\Controller\\User\\ThemeSettingsController::TREE') %}
-                <li class="collapsed--toggle"
-                    data-comment-collapse-target="collapse">
-                    <a class="stretched-link"
-                       data-action="comment-collapse#toggleCollapse:prevent">
-                        {{ 'collapse'|trans|lower }}
-                    </a>
-                </li>
-                <li class="collapsed--toggle hidden"
-                    data-comment-collapse-target="expand">
-                    <a class="stretched-link"
-                       data-action="comment-collapse#toggleCollapse:prevent">
-                        <span data-comment-collapse-target="count"></span> {{ 'expand'|trans|lower }}
-                    </a>
-                </li>
-                {% endif %}
-                </menu>
-            </aside>
             <footer>
                 {% if (comment.visibility in ['visible', 'private'] or comment.visibility is same as 'trashed' and this.canSeeTrashed) and comment.image %}
                     <figure>
@@ -134,14 +113,12 @@
                                 {% endif %}
                                 {% if is_granted('edit', comment) %}
                                     <li>
-                                        <a href="{{ entry_comment_edit_url(comment) }}"
-                                           class="{{ html_classes({'active': is_route_name('entry_comment_edit')}) }}"
+                                        <a href="{{ path('entry_comment_report', {id: comment.id}) }}"
+                                           class="{{ html_classes({'active': is_route_name('entry_comment_report')}) }}"
                                            data-action="subject#getForm">
                                             {{ 'edit'|trans }}
                                         </a>
                                     </li>
-                                {% endif %}
-                                {% if app.user and comment.isAuthor(app.user) %}
                                     <li>
                                         <form method="post"
                                               action="{{ entry_comment_delete_url(comment) }}"
@@ -160,15 +137,87 @@
                                             {{ 'moderate'|trans }}
                                         </a>
                                     </li>
-                                {% endif %}
-                            </ul>
-                        </li>
+                                    <li>
+                                        <a data-action="clipboard#copy"
+                                           href="{{ entry_url(comment.entry) }}#{{ get_url_fragment(comment) }}">
+                                            {{ 'copy_url'|trans|lower }}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a data-action="clipboard#copy"
+                                           href="{{ comment.apId ?? path('ap_entry_comment', {magazine_name: comment.magazine.name, entry_id: comment.entry.id, comment_id: comment.id}) }}">
+                                            {{ 'copy_url_to_fediverse'|trans|lower }}
+                                        </a>
+                                    </li>
+                                    {% if is_granted('edit', comment) %}
+                                        <li>
+                                            <a href="{{ entry_comment_edit_url(comment) }}"
+                                               class="{{ html_classes({'active': is_route_name('entry_comment_edit')}) }}"
+                                               data-action="subject#getForm">
+                                                {{ 'edit'|trans|lower }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if app.user and comment.isAuthor(app.user) %}
+                                        <li>
+                                            <form method="post"
+                                                  action="{{ entry_comment_delete_url(comment) }}"
+                                                  onsubmit="return confirm('{{ 'are_you_sure'|trans }}');">
+                                                <input type="hidden" name="token"
+                                                       value="{{ csrf_token('entry_comment_delete') }}">
+                                                <button type="submit">{{ 'delete'|trans|lower }}</button>
+                                            </form>
+                                        </li>
+                                    {% endif %}
+                                    {% if is_granted('moderate', comment) %}
+                                        <li>
+                                            <a href="{{ entry_comment_moderate_url(comment) }}"
+                                               class="{{ html_classes({'active': is_route_name('entry_comment_moderate')}) }}"
+                                               data-action="subject#showModPanel">
+                                                {{ 'moderate'|trans|lower }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </li>
+                        {% elseif(comment.visibility is same as 'trashed' and this.canSeeTrashed) %}
+                            <li>
+                                <form method="post"
+                                      action="{{ path('entry_comment_restore', {magazine_name: comment.magazine.name, entry_id: comment.entry.id, comment_id: comment.id}) }}"
+                                      onsubmit="return confirm('{{ 'are_you_sure'|trans }}');">
+                                    <input type="hidden" name="token" value="{{ csrf_token('entry_comment_restore') }}">
+                                    <button type="submit">{{ 'restore'|trans|lower }}</button>
+                                </form>
+                            </li>
+                            <li data-subject-target="loader" style="display:none">
+                                <div class="loader" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </li>
+                        {% endif %}
                         <li data-subject-target="loader" style="display:none">
                             <div class="loader" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
                         </li>
                     </menu>
+                    {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW'), 'tree') is same as constant('App\\Controller\\User\\ThemeSettingsController::TREE') %}
+                        <menu class="collapse">
+                            <li data-comment-collapse-target="collapse">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    {{ 'collapse'|trans|lower }}
+                                </a>
+                            </li>
+                            <li class="hidden"
+                                data-comment-collapse-target="expand">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    <span data-comment-collapse-target="count"></span> {{ 'expand'|trans|lower }}
+                                </a>
+                            </li>
+                        </menu>
+                    {% endif %}
                 {% elseif(comment.visibility is same as 'trashed' and this.canSeeTrashed) %}
                     <menu>
                         <li>
@@ -185,6 +234,23 @@
                             </div>
                         </li>
                     </menu>
+                    {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW'), 'tree') is same as constant('App\\Controller\\User\\ThemeSettingsController::TREE') %}
+                        <menu class="collapse">
+                            <li data-comment-collapse-target="collapse">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    {{ 'collapse'|trans|lower }}
+                                </a>
+                            </li>
+                            <li class="hidden"
+                                data-comment-collapse-target="expand">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    <span data-comment-collapse-target="count"></span> {{ 'expand'|trans|lower }}
+                                </a>
+                            </li>
+                        </menu>
+                    {% endif %}
                 {% else %}
                     <menu>
                         <li data-subject-target="loader" style="display:none">
@@ -193,6 +259,23 @@
                             </div>
                         </li>
                     </menu>
+                    {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW'), 'tree') is same as constant('App\\Controller\\User\\ThemeSettingsController::TREE') %}
+                        <menu class="collapse">
+                            <li data-comment-collapse-target="collapse">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    {{ 'collapse'|trans|lower }}
+                                </a>
+                            </li>
+                            <li class="hidden"
+                                data-comment-collapse-target="expand">
+                                <a class="stretched-link"
+                                   data-action="comment-collapse#toggleCollapse:prevent">
+                                    <span data-comment-collapse-target="count"></span> {{ 'expand'|trans|lower }}
+                                </a>
+                            </li>
+                        </menu>
+                    {% endif %}
                 {% endif %}
                 <div data-subject-target="container" class="js-container">
                 </div>

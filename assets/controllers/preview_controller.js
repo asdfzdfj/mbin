@@ -7,12 +7,28 @@ import { useThrottle } from 'stimulus-use'
 export default class extends Controller {
     static values = {
         loading: Boolean,
+    };
+
+    static throttles = ['show'];
+
+    connect() {
+        useThrottle(this, {wait: 1000});
     }
 
-    static throttles = ['show']
+    async retry(event) {
+        let container = this.element.closest('.js-container');
+        let parent = container.previousElementSibling
+               && container.previousElementSibling.dataset.controller.includes('preview')
+            ? container.previousElementSibling : null;
 
-    connect(){
-        useThrottle(this, {wait: 1000});
+        if (!(container && parent)) {
+            return;
+        }
+
+        container.remove();
+
+        let parentPreview = this.application.getControllerForElementAndIdentifier(parent, 'preview');
+        await parentPreview.show(event);
     }
 
     async show(event) {
@@ -54,9 +70,9 @@ export default class extends Controller {
         } catch (e) {
             console.error('preview failed: ', e);
             let failedHtml =
-                `<div class="preview">
+                `<div class="preview" data-controller="preview">
                     <a class="retry-failed" href="#"
-                        data-action="preview#show"
+                        data-action="preview#retry"
                         data-preview-url-param="${event.params.url}"
                         data-preview-ratio-param="${event.params.ratio}">
                             Failed to load. Click to retry.

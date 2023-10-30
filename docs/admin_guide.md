@@ -930,8 +930,10 @@ oneup_flysystem:
       awss3v3:
         client: kbin.s3_client
         bucket: "%amazon.s3.bucket%"
-        options:
-          ACL: public-read
+        # add this option if S3 ACLs is in use to allow users to view your images
+        # no need if S3 bucket policies or IAM policies is used for access control
+        #options:
+        #  ACL: public-read
 
   filesystems:
     public_uploads_filesystem:

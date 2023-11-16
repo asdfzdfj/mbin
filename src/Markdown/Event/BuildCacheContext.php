@@ -31,7 +31,7 @@ class BuildCacheContext
     {
         ksort($this->context);
 
-        return hash('sha256', json_encode($this->context));
+        return 'md_'.hash('sha256', json_encode($this->context));
     }
 
     public function hasContext(string $key, ?string $value = null): bool

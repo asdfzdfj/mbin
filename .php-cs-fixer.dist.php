@@ -10,6 +10,7 @@ $finder = (new PhpCsFixer\Finder())
         'vendor',
         'docker',
     ])
+    ->exclude('public/media')
 ;
 
 return (new PhpCsFixer\Config())

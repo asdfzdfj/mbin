@@ -32,7 +32,7 @@ if [ "$answer" != "${answer#[Yy]}" ]; then
 
         cd "$BIN_DIR/.."
         echo "INFO: Install/update PHP packages"
-        composer install --no-dev
+        composer install
         echo "INFO: Dump env file"
         composer dump-env prod
         echo "INFO: Clear application cache"
@@ -45,7 +45,7 @@ if [ "$answer" != "${answer#[Yy]}" ]; then
         # Note: npm install also require dev dependencies for the build step
         npm ci --include=dev
         echo "INFO: Build frontend (production)"
-        NODE_ENV=production npm run build
+        NODE_ENV=production npm run dev
     fi
 
     echo -e "INFO: Upgrade successfully completed!\n"

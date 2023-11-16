@@ -1345,12 +1345,56 @@ User-agent: Omigili
 Disallow: /
 User-agent: Diffbot
 Disallow: /
+
+# Disable marketing/SEO bots
+User-agent: AhrefsBot
+Disallow: /
 User-agent: Amazonbot
+Disallow: /
+
+# blocking them seo search bot, no hard feelings but it pollutes log
+User-agent: DataForSeoBot
+Disallow: /
+
+User-Agent: ImagesiftBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: SiteAuditBot
+Disallow: /
+
+User-agent: SemrushBot-BA
+Disallow: /
+
+User-agent: SemrushBot-SI
+Disallow: /
+
+User-agent: SemrushBot-SWA
+Disallow: /
+
+User-agent: SemrushBot-CT
+Disallow: /
+
+User-agent: SplitSignalBot
+Disallow: /
+
+User-agent: SemrushBot-COUB
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: barkrowler
 Disallow: /
 
 # Rest of indexing robots
 User-agent: *
-Request-rate: 1/1s
+Request-rate: 1/5s
 Disallow: /login
 Disallow: /login*
 Disallow: /register

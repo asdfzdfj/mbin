@@ -115,7 +115,7 @@ services:
             - version: "%amazon.s3.version%"
               region: "%amazon.s3.region%"
               endpoint: "%amazon.s3.endpoint%"
-              #use_path_style_endpoint: true
+              use_path_style_endpoint: true
               credentials:
                   key: "%amazon.s3.key%"
                   secret: "%amazon.s3.secret%"

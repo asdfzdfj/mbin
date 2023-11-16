@@ -14,18 +14,19 @@ liip_imagine:
             flysystem:
                 filesystem_service: oneup_flysystem.public_uploads_filesystem_filesystem
 
-    driver: gd
+    driver: imagick
     cache: kbin.liip_resolver
     data_loader: kbin.liip_loader
     default_image: null
     twig:
-        mode: legacy
+        mode: lazy
     default_filter_set_settings:
         quality: 90
+        animated: true
 
     controller:
         # Set this value to 301 if you want to enable image resolve redirects using 301 *cached* responses (eg. when behind Nginx)
-        redirect_response_code: 302
+        redirect_response_code: 301
 
     webp:
         generate: true

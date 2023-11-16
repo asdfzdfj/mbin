@@ -1,7 +1,18 @@
+parameters:
+    messenger_common_amqp_arguments:
+        arguments:
+            x-queue-version: 2
+            x-queue-type: 'classic'
+    messenger_common_retry_strategy:
+        max_retries: 3
+        delay: 10000
+        multiplier: 1
+        max_delay: 86400000
+
 framework:
     messenger:
         # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-        failure_transport: failed
+        failure_transport: dead
 
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
@@ -10,115 +21,69 @@ framework:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     queues:
-                        async:
-                            arguments:
-                                x-queue-version: 2
-                                x-queue-type: 'classic'
+                        async: '%messenger_common_amqp_arguments%'
                     exchange:
                         name: async
-                retry_strategy:
-                    max_retries: 7
-                    delay: 300000
-                    multiplier: 4
-                    max_delay: 86400000
+                retry_strategy: '%messenger_common_retry_strategy%'
                 serializer: messenger.transport.symfony_serializer
             inbox:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     queues:
-                        inbox:
-                            arguments:
-                                x-queue-version: 2
-                                x-queue-type: 'classic'
+                        inbox: '%messenger_common_amqp_arguments%'
                     exchange:
                         name: inbox
-                retry_strategy:
-                    max_retries: 7
-                    delay: 300000
-                    multiplier: 4
-                    max_delay: 86400000
+                retry_strategy: '%messenger_common_retry_strategy%'
                 serializer: messenger.transport.symfony_serializer
             receive:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     queues:
-                        receive:
-                            arguments:
-                                x-queue-version: 2
-                                x-queue-type: 'classic'
+                        receive: '%messenger_common_amqp_arguments%'
                     exchange:
                         name: receive
-                retry_strategy:
-                    max_retries: 7
-                    delay: 300000
-                    multiplier: 4
-                    max_delay: 86400000
+                retry_strategy: '%messenger_common_retry_strategy%'
                 serializer: messenger.transport.symfony_serializer
             deliver:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     queues:
-                        deliver:
-                            arguments:
-                                x-queue-version: 2
-                                x-queue-type: 'classic'
+                        deliver: '%messenger_common_amqp_arguments%'
                     exchange:
                         name: deliver
-                retry_strategy:
-                    max_retries: 7
-                    delay: 300000
-                    multiplier: 4
-                    max_delay: 86400000
+                retry_strategy: '%messenger_common_retry_strategy%'
                 serializer: messenger.transport.symfony_serializer
             outbox:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     queues:
-                        outbox:
-                            arguments:
-                                x-queue-version: 2
-                                x-queue-type: 'classic'
+                        outbox: '%messenger_common_amqp_arguments%'
                     exchange:
                         name: outbox
-                retry_strategy:
-                    max_retries: 7
-                    delay: 300000
-                    multiplier: 4
-                    max_delay: 86400000
+                retry_strategy: '%messenger_common_retry_strategy%'
                 serializer: messenger.transport.symfony_serializer
             resolve:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     queues:
-                        resolve:
-                            arguments:
-                                x-queue-version: 2
-                                x-queue-type: 'classic'
+                        resolve: '%messenger_common_amqp_arguments%'
                     exchange:
                         name: resolve
-                retry_strategy:
-                    max_retries: 7
-                    delay: 300000
-                    multiplier: 4
-                    max_delay: 86400000
+                retry_strategy: '%messenger_common_retry_strategy%'
                 serializer: messenger.transport.symfony_serializer
             old:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     queues:
                         messages: ~
-                retry_strategy:
-                    max_retries: 7
-                    delay: 300000
-                    multiplier: 4
-                    max_delay: 86400000
+                retry_strategy: '%messenger_common_retry_strategy%'
                 serializer: messenger.transport.symfony_serializer
             failed:
                 failure_transport: dead
                 retry_strategy:
                     max_retries: 3
-                    delay: 1800000
-                    multiplier: 2
+                    delay: 10000
+                    multiplier: 1
                 dsn: "doctrine://default?queue_name=failed"
                 serializer: messenger.transport.symfony_serializer
             dead:

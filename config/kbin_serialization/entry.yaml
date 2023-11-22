@@ -1,40 +1,40 @@
 App\DTO\EntryDto:
-  attributes:
-    id:
-      groups: [ 'entry:collection:get', 'entry:item:get', 'entry:comment:collection:get' ]
-    magazine:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    domain:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    user:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    image:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    title:
-      groups: [ 'entry:collection:get', 'entry:item:get', 'entry:comment:collection:get' ]
-    url:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    body:
-      groups: [ 'entry:item:get' ]
-    isAdult:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    hasEmbed:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    type:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    comments:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    uv:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    dv:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    views:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    score:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    visibility:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    createdAt:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
-    lastActive:
-      groups: [ 'entry:collection:get', 'entry:item:get' ]
+    attributes:
+        id:
+            groups: [ 'entry:collection:get', 'entry:item:get', 'entry:comment:collection:get' ]
+        magazine:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        domain:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        user:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        image:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        title:
+            groups: [ 'entry:collection:get', 'entry:item:get', 'entry:comment:collection:get' ]
+        url:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        body:
+            groups: [ 'entry:item:get' ]
+        isAdult:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        hasEmbed:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        type:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        comments:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        uv:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        dv:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        views:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        score:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        visibility:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        createdAt:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]
+        lastActive:
+            groups: [ 'entry:collection:get', 'entry:item:get' ]

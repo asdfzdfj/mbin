@@ -150,52 +150,44 @@ services:
     # Language
     App\EventListener\LanguageListener:
         tags:
-            - {
-                  name: kernel.event_listener,
-                  event: kernel.request,
-                  priority: 200,
-              }
+            - name: kernel.event_listener
+              event: kernel.request
+              priority: 200
         arguments: ["%kbin_default_lang%"]
 
     # User
     App\EventListener\UserHomepageListener:
         tags:
-            - {
-                  name: kernel.event_listener,
-                  event: kernel.request,
-                  priority: 7,
-              }
+            - name: kernel.event_listener
+              event: kernel.request
+              priority: 7
 
     # Federation
     App\EventListener\FederationStatusListener:
         tags:
-            - {
-                  name: kernel.event_listener,
-                  event: kernel.controller,
-                  priority: -5,
-              }
+            - name: kernel.event_listener
+              event: kernel.controller
+              priority: -5
         arguments: ["%kbin_federation_enabled%"]
 
     App\EventListener\UserActivityListener:
         tags:
-            - {
-                  name: kernel.event_listener,
-                  event: kernel.controller,
-                  priority: -5,
-              }
+            - name: kernel.event_listener
+              event: kernel.controller
+              priority: -5
+
 
     # Notifications
     App\EventListener\ContentNotificationPurgeListener:
         tags:
-            - { name: doctrine.event_listener, event: preRemove }
+            - name: doctrine.event_listener
+              event: preRemove
 
     # Magazine
     App\EventListener\MagazineVisibilityListener:
         tags:
-            - {
-                  name: kernel.event_listener,
-                  event: kernel.controller_arguments,
-              }
+            - name: kernel.event_listener
+              event: kernel.controller_arguments
 
     # Feeds
     debril.rss_atom.provider:

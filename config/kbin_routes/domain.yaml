@@ -1,33 +1,33 @@
 domain_entries:
-  controller: App\Controller\Domain\DomainFrontController
-  defaults: { sortBy: hot, time: '∞', type: ~ }
-  path: /d/{name}/{sortBy}/{time}/{type}
-  methods: [ GET ]
-  requirements: { sortBy: "%front_sort_options%" }
+    controller: App\Controller\Domain\DomainFrontController
+    defaults: { sortBy: hot, time: '∞', type: ~ }
+    path: /d/{name}/{sortBy}/{time}/{type}
+    methods: [ GET ]
+    requirements: { sortBy: "%front_sort_options%" }
 
 domain_comments:
-  controller: App\Controller\Domain\DomainCommentFrontController
-  defaults: { sortBy: hot, time: ~ }
-  path: /d/{name}/comments/{sortBy}/{time}
-  methods: [GET]
-  requirements: { sortBy: "%front_sort_options%" }
+    controller: App\Controller\Domain\DomainCommentFrontController
+    defaults: { sortBy: hot, time: ~ }
+    path: /d/{name}/comments/{sortBy}/{time}
+    methods: [GET]
+    requirements: { sortBy: "%front_sort_options%" }
 
 domain_subscribe:
-  controller: App\Controller\Domain\DomainSubController::subscribe
-  path: /d/{name}/subscribe
-  methods: [ POST ]
+    controller: App\Controller\Domain\DomainSubController::subscribe
+    path: /d/{name}/subscribe
+    methods: [ POST ]
 
 domain_unsubscribe:
-  controller: App\Controller\Domain\DomainSubController::unsubscribe
-  path: /d/{name}/unsubscribe
-  methods: [ POST ]
+    controller: App\Controller\Domain\DomainSubController::unsubscribe
+    path: /d/{name}/unsubscribe
+    methods: [ POST ]
 
 domain_block:
-  controller: App\Controller\Domain\DomainBlockController::block
-  path: /d/{name}/block
-  methods: [ POST ]
+    controller: App\Controller\Domain\DomainBlockController::block
+    path: /d/{name}/block
+    methods: [ POST ]
 
 domain_unblock:
-  controller: App\Controller\Domain\DomainBlockController::unblock
-  path: /d/{name}/unblock
-  methods: [ POST ]
+    controller: App\Controller\Domain\DomainBlockController::unblock
+    path: /d/{name}/unblock
+    methods: [ POST ]

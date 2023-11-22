@@ -1,31 +1,30 @@
 page_contact:
-  controller: App\Controller\ContactController
-  path: /contact
-  methods: [ GET, POST ]
+    controller: App\Controller\ContactController
+    path: /contact
+    methods: [ GET, POST ]
 
 page_faq:
-  controller: App\Controller\FaqController
-  path: /faq
-  methods: [ GET ]
+    controller: App\Controller\FaqController
+    path: /faq
+    methods: [ GET ]
 
 page_privacy_policy:
-  controller: App\Controller\PrivacyPolicyController
-  path: /privacy-policy
-  methods: [ GET ]
+    controller: App\Controller\PrivacyPolicyController
+    path: /privacy-policy
+    methods: [ GET ]
 
 page_terms:
-  controller: App\Controller\TermsController
-  path: /terms
-  methods: [ GET ]
+    controller: App\Controller\TermsController
+    path: /terms
+    methods: [ GET ]
 
 stats:
-  controller: App\Controller\StatsController
-  defaults: { statsType: general, statsPeriod: -1, withFederated: false }
-  path: /stats/{statsType}/{statsPeriod}/{withFederated}
-  methods: [ GET ]
+    controller: App\Controller\StatsController
+    defaults: { statsType: general, statsPeriod: -1, withFederated: false }
+    path: /stats/{statsType}/{statsPeriod}/{withFederated}
+    methods: [ GET ]
 
 page_federation:
-  controller: App\Controller\FederationController
-  path: /federation
-  methods: [ GET ]
-
+    controller: App\Controller\FederationController
+    path: /federation
+    methods: [ GET ]

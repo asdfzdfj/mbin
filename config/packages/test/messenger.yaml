@@ -1,5 +1,5 @@
 framework:
-  messenger:
-    routing:
-      App\Message\Contracts\AsyncMessageInterface: sync
-      App\Message\Contracts\AsyncApMessageInterface: sync
+    messenger:
+        routing:
+            App\Message\Contracts\AsyncMessageInterface: sync
+            App\Message\Contracts\AsyncApMessageInterface: sync

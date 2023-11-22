@@ -113,28 +113,28 @@ ap_magazine_moderators:
 
 ap_entry:
     controller: App\Controller\ActivityPub\EntryController
-    defaults: { slug: -, sortBy: hot }
+    defaults: { slug: '-', sortBy: hot }
     path: /m/{magazine_name}/t/{entry_id}/{slug}/{sortBy}
     methods: [GET]
     condition: '%kbin_ap_route_condition%'
 
 ap_entry_comment:
     controller: App\Controller\ActivityPub\EntryCommentController
-    defaults: { slug: - }
+    defaults: { slug: '-' }
     path: /m/{magazine_name}/t/{entry_id}/{slug}/comment/{comment_id}
     methods: [GET]
     condition: '%kbin_ap_route_condition%'
 
 ap_post:
     controller: App\Controller\ActivityPub\PostController
-    defaults: { slug: - }
+    defaults: { slug: '-' }
     path: /m/{magazine_name}/p/{post_id}/{slug}
     methods: [GET]
     condition: '%kbin_ap_route_condition%'
 
 ap_post_comment:
     controller: App\Controller\ActivityPub\PostCommentController
-    defaults: { slug: - }
+    defaults: { slug: '-' }
     path: /m/{magazine_name}/p/{post_id}/{slug}/reply/{comment_id}
     methods: [GET]
     condition: '%kbin_ap_route_condition%'

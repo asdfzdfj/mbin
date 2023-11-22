@@ -1,6 +1,6 @@
 nucleos_antispam:
-  time:
-    min: 1
-    global: true
-  honeypot:
-    global: false
+    time:
+        min: 1
+        global: true
+    honeypot:
+        global: false

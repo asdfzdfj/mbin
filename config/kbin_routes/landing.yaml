@@ -1,9 +1,9 @@
 about:
-  controller: App\Controller\AboutController
-  path: /about
-  methods: [ GET ]
+    controller: App\Controller\AboutController
+    path: /about
+    methods: [ GET ]
 
 bot:
-  controller: App\Controller\BotController
-  path: /bot
-  methods: [ GET ]
+    controller: App\Controller\BotController
+    path: /bot
+    methods: [ GET ]

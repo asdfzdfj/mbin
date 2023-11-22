@@ -1,30 +1,30 @@
 App\DTO\PostDto:
-  attributes:
-    id:
-      groups: [ 'post:collection:get', 'post:item:get', 'post:comment:collection:get' ]
-    magazine:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    user:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    image:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    body:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    isAdult:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    comments:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    uv:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    dv:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    score:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    visibility:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    createdAt:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    lastActive:
-      groups: [ 'post:collection:get', 'post:item:get' ]
-    bestComments:
-      groups: [ 'post:collection:get', 'post:item:get', 'post:comment:collection:get' ]
+    attributes:
+        id:
+            groups: [ 'post:collection:get', 'post:item:get', 'post:comment:collection:get' ]
+        magazine:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        user:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        image:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        body:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        isAdult:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        comments:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        uv:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        dv:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        score:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        visibility:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        createdAt:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        lastActive:
+            groups: [ 'post:collection:get', 'post:item:get' ]
+        bestComments:
+            groups: [ 'post:collection:get', 'post:item:get', 'post:comment:collection:get' ]

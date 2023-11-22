@@ -1,108 +1,108 @@
 app_register:
-  controller: App\Controller\Security\RegisterController
-  path: /register
-  methods: [ GET, POST ]
+    controller: App\Controller\Security\RegisterController
+    path: /register
+    methods: [ GET, POST ]
 
 app_verify_email:
-  controller: App\Controller\Security\VerifyEmailController
-  path: /verify/email
-  methods: [ GET ]
+    controller: App\Controller\Security\VerifyEmailController
+    path: /verify/email
+    methods: [ GET ]
 
 app_forgot_password_request:
-  controller: App\Controller\Security\ResetPasswordController::request
-  path: /reset-password
-  methods: [ GET, POST ]
+    controller: App\Controller\Security\ResetPasswordController::request
+    path: /reset-password
+    methods: [ GET, POST ]
 
 app_check_email:
-  controller: App\Controller\Security\ResetPasswordController::checkEmail
-  path: /reset-password/check-email
-  methods: [ GET, POST ]
+    controller: App\Controller\Security\ResetPasswordController::checkEmail
+    path: /reset-password/check-email
+    methods: [ GET, POST ]
 
 app_reset_password:
-  controller: App\Controller\Security\ResetPasswordController::reset
-  defaults: { token: ~ }
-  path: /reset-password/reset/{token}
-  methods: [ GET, POST ]
+    controller: App\Controller\Security\ResetPasswordController::reset
+    defaults: { token: ~ }
+    path: /reset-password/reset/{token}
+    methods: [ GET, POST ]
 
 app_login:
-  controller: App\Controller\Security\LoginController
-  path: /login
-  methods: [ GET, POST ]
+    controller: App\Controller\Security\LoginController
+    path: /login
+    methods: [ GET, POST ]
 
 app_resend_email_activation:
-  controller: App\Controller\Security\ResendActivationEmailController::resend
-  path: /resend-email-activation/
-  
+    controller: App\Controller\Security\ResendActivationEmailController::resend
+    path: /resend-email-activation/
+
 app_consent:
-  controller: App\Controller\Security\LoginController::consent
-  path: /consent
-  methods: [ GET, POST ]
+    controller: App\Controller\Security\LoginController::consent
+    path: /consent
+    methods: [ GET, POST ]
 
 app_logout:
-  controller: App\Controller\Security\LogoutController
-  path: /logout
-  methods: [ GET ]
+    controller: App\Controller\Security\LogoutController
+    path: /logout
+    methods: [ GET ]
 
 oauth_facebook_connect:
-  controller: App\Controller\Security\FacebookController::connect
-  path: /oauth/facebook/connect
-  methods: [ GET ]
+    controller: App\Controller\Security\FacebookController::connect
+    path: /oauth/facebook/connect
+    methods: [ GET ]
 
 oauth_facebook_verify:
-  controller: App\Controller\Security\FacebookController::verify
-  path: /oauth/facebook/verify
-  methods: [ GET ]
+    controller: App\Controller\Security\FacebookController::verify
+    path: /oauth/facebook/verify
+    methods: [ GET ]
 
 oauth_google_connect:
-  controller: App\Controller\Security\GoogleController::connect
-  path: /oauth/google/connect
-  methods: [ GET ]
+    controller: App\Controller\Security\GoogleController::connect
+    path: /oauth/google/connect
+    methods: [ GET ]
 
 oauth_google_verify:
-  controller: App\Controller\Security\GoogleController::verify
-  path: /oauth/google/verify
-  methods: [ GET ]
+    controller: App\Controller\Security\GoogleController::verify
+    path: /oauth/google/verify
+    methods: [ GET ]
 
 oauth_github_connect:
-  controller: App\Controller\Security\GithubController::connect
-  path: /oauth/github/connect
-  methods: [ GET ]
+    controller: App\Controller\Security\GithubController::connect
+    path: /oauth/github/connect
+    methods: [ GET ]
 
 oauth_github_verify:
-  controller: App\Controller\Security\GithubController::verify
-  path: /oauth/github/verify
-  methods: [ GET ]
+    controller: App\Controller\Security\GithubController::verify
+    path: /oauth/github/verify
+    methods: [ GET ]
 
 oauth_keycloak_connect:
-  controller: App\Controller\Security\KeycloakController::connect
-  path: /oauth/keycloak/connect
-  methods: [ GET ]
+    controller: App\Controller\Security\KeycloakController::connect
+    path: /oauth/keycloak/connect
+    methods: [ GET ]
 
 oauth_keycloak_verify:
-  controller: App\Controller\Security\KeycloakController::verify
-  path: /oauth/keycloak/verify
-  methods: [ GET ]
+    controller: App\Controller\Security\KeycloakController::verify
+    path: /oauth/keycloak/verify
+    methods: [ GET ]
 
 oauth_create_client:
-  controller: App\Controller\Api\OAuth2\CreateClientApi
-  path: /api/client
-  methods: [ POST ]
-  format: json
+    controller: App\Controller\Api\OAuth2\CreateClientApi
+    path: /api/client
+    methods: [ POST ]
+    format: json
 
 oauth_create_client_image:
-  controller: App\Controller\Api\OAuth2\CreateClientApi::uploadImage
-  path: /api/client-with-logo
-  methods: [ POST ]
-  format: json
+    controller: App\Controller\Api\OAuth2\CreateClientApi::uploadImage
+    path: /api/client-with-logo
+    methods: [ POST ]
+    format: json
 
 oauth_revoke_token:
-  controller: App\Controller\Api\OAuth2\RevokeTokenApi
-  path: /api/revoke
-  methods: [ POST ]
-  format: json
+    controller: App\Controller\Api\OAuth2\RevokeTokenApi
+    path: /api/revoke
+    methods: [ POST ]
+    format: json
 
 oauth_delete_client:
-  controller: App\Controller\Api\OAuth2\DeleteClientApi
-  path: /api/client
-  methods: [ DELETE ]
-  format: json
+    controller: App\Controller\Api\OAuth2\DeleteClientApi
+    path: /api/client
+    methods: [ DELETE ]
+    format: json

@@ -115,7 +115,6 @@ class Post implements VotableInterface, CommentInterface, VisibilityInterface, R
         $this->magazine = $magazine;
         $this->user = $user;
         $this->isAdult = $isAdult;
-        $this->ip = $ip;
         $this->comments = new ArrayCollection();
         $this->votes = new ArrayCollection();
         $this->reports = new ArrayCollection();

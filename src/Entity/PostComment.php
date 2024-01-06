@@ -109,7 +109,6 @@ class PostComment implements VotableInterface, VisibilityInterface, ReportInterf
         $this->post = $post;
         $this->user = $user;
         $this->parent = $parent;
-        $this->ip = $ip;
         $this->votes = new ArrayCollection();
         $this->children = new ArrayCollection();
         $this->reports = new ArrayCollection();

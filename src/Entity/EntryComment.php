@@ -112,7 +112,6 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
         $this->entry = $entry;
         $this->user = $user;
         $this->parent = $parent;
-        $this->ip = $ip;
         $this->votes = new ArrayCollection();
         $this->children = new ArrayCollection();
         $this->reports = new ArrayCollection();

@@ -160,7 +160,6 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
         $this->isAdult = $isAdult;
         $this->isOc = $isOc;
         $this->lang = $lang;
-        $this->ip = $ip;
         $this->comments = new ArrayCollection();
         $this->votes = new ArrayCollection();
         $this->reports = new ArrayCollection();

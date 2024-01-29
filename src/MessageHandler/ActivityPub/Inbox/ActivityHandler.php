@@ -74,7 +74,13 @@ readonly class ActivityHandler
                 $user = $this->manager->findActorOrCreate($payload['id']);
             }
         } catch (\Exception $e) {
-            $this->logger->error('payload: '.json_encode($payload));
+            $this->logger->error(
+                'error while verifying actors: {msg}', [
+                    'msg' => $e->getMessage(),
+                    'err' => $e,
+                    'payload' => $payload,
+                ]
+            );
 
             return;
         }
@@ -126,7 +132,7 @@ readonly class ActivityHandler
             case 'Article':
             case 'Question':
                 $this->bus->dispatch(new CreateMessage($payload));
-                // no break
+                break;
             case 'Announce':
                 $this->bus->dispatch(new AnnounceMessage($payload));
                 break;

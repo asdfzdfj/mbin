@@ -46,7 +46,7 @@ class EntryCommentNoteFactory
         }
 
         $cc = [$this->groupFactory->getActivityPubId($comment->magazine)];
-        if ($followersUrl = $comment->user->getFollowerUrl($this->client, $this->urlGenerator, null !== $comment->apId)) {
+        if ($followersUrl = $this->activityPubManager->getUserFollowerUrl($comment->user, null !== $comment->apId)) {
             $cc[] = $followersUrl;
         }
 

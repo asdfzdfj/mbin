@@ -32,7 +32,7 @@ class WebFingerFactory
         $actorHandle = ActorHandle::parse($handle);
 
         if (!$actorHandle) {
-            throw new \Exception("WebFinger handle is malformed '{$handle}'");
+            throw new \Exception("WebFinger handle is malformed: '{$handle}'");
         }
 
         // Build a WebFinger URL
@@ -47,7 +47,7 @@ class WebFingerFactory
         $content = $this->client->getWebfingerObject($url);
 
         if (!\is_array($content) || !\count($content)) {
-            throw new \Exception('WebFinger fetching has failed, no contents returned');
+            throw new \Exception("WebFinger fetching for '{$handle}' has failed: no contents returned");
         }
 
         return new WebFinger($content);

@@ -52,7 +52,7 @@ class PostNoteFactory
         );
 
         $cc = [];
-        if ($followersUrl = $post->user->getFollowerUrl($this->client, $this->urlGenerator, null !== $post->apId)) {
+        if ($followersUrl = $this->activityPubManager->getUserFollowerUrl($post->user, null !== $post->apId)) {
             $cc[] = $followersUrl;
         }
 

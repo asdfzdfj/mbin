@@ -80,29 +80,17 @@ class ApActivityRepository extends ServiceEntityRepository
             $id = \intval(end($exploded));
             if ('p' === $exploded[3]) {
                 if (4 === \count($exploded)) {
-                    return [
-                        'id' => $id,
-                        'type' => Post::class,
-                    ];
+                    return ['id' => $id, 'type' => Post::class];
                 } else {
-                    return [
-                        'id' => $id,
-                        'type' => PostComment::class,
-                    ];
+                    return ['id' => $id, 'type' => PostComment::class];
                 }
             }
 
             if ('t' === $exploded[3]) {
                 if (4 === \count($exploded)) {
-                    return [
-                        'id' => $id,
-                        'type' => Entry::class,
-                    ];
+                    return ['id' => $id, 'type' => Entry::class];
                 } else {
-                    return [
-                        'id' => $id,
-                        'type' => EntryComment::class,
-                    ];
+                    return ['id' => $id, 'type' => EntryComment::class];
                 }
             }
         }

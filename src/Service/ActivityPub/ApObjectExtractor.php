@@ -16,6 +16,14 @@ class ApObjectExtractor
     ) {
     }
 
+    /**
+     * wrap given object in an array if it wasn't already one.
+     */
+    public static function wrapArray(mixed $object): array
+    {
+        return \is_array($object) && array_is_list($object) ? $object : [$object];
+    }
+
     public function getMarkdownBody(array $object): ?string
     {
         $content = $object['content'] ?? null;

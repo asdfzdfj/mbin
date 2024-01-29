@@ -40,7 +40,10 @@ class CreateHandler
     public function __invoke(CreateMessage $message): void
     {
         $this->object = $message->payload;
-        $this->logger->debug('Got a CreateMessage of type {t}', [$message->payload['type'], $message->payload]);
+        $this->logger->debug('Got a CreateMessage of type {type}', [
+            'type' => $message->payload['type'],
+            'payload' => $message->payload,
+        ]);
 
         try {
             if ('Note' === $this->object['type']) {

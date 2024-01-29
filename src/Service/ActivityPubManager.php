@@ -32,6 +32,7 @@ use App\Service\ActivityPub\ApHttpClient;
 use App\Service\ActivityPub\ApObjectExtractor;
 use App\Service\ActivityPub\Webfinger\WebFinger;
 use App\Service\ActivityPub\Webfinger\WebFingerFactory;
+use App\Utils\ArrayTool;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use League\HTMLToMarkdown\HtmlConverter;
@@ -80,6 +81,24 @@ class ActivityPubManager
     public function findRemoteActor(string $actorUrl): ?User
     {
         return $this->userRepository->findOneBy(['apProfileId' => $actorUrl]);
+    }
+
+    public function getUserFollowerUrl(User $user, bool $isRemote): ?string
+    {
+        if ($isRemote) {
+            $actorObject = $this->apHttpClient->getActorObject($user->apProfileId);
+            if (!empty($actorObject['followers']) && \is_string($actorObject['followers'])) {
+                return $actorObject['followers'];
+            }
+
+            return null;
+        } else {
+            return $this->urlGenerator->generate(
+                'ap_user_followers',
+                ['username' => $user->username],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+        }
     }
 
     public function createCcFromBody(string $body): array
@@ -573,8 +592,8 @@ class ActivityPubManager
         $arr = array_unique(
             array_filter(
                 array_merge(
-                    \is_array($activity['cc']) ? $activity['cc'] : [$activity['cc']],
-                    \is_array($activity['to']) ? $activity['to'] : [$activity['to']]
+                    ArrayTool::wrapList($activity['cc']),
+                    ArrayTool::wrapList($activity['to']),
                 ), fn ($val) => !\in_array($val, [ActivityPubActivityInterface::PUBLIC_URL, $followersUrl, []])
             )
         );
@@ -690,34 +709,18 @@ class ActivityPubManager
 
     public static function getReceivers(array $object): array
     {
-        $res = [];
-        if (isset($object['to']) and \is_array($object['to'])) {
-            $res = $object['to'];
-        } elseif (isset($object['to']) and \is_string($object['to'])) {
-            $res[] = $object['to'];
-        }
+        $mainTo = ArrayTool::wrapList($object['to'] ?? []);
+        $mainCc = ArrayTool::wrapList($object['cc'] ?? []);
 
-        if (isset($object['cc']) and \is_array($object['cc'])) {
-            $res = array_merge($res, $object['cc']);
-        } elseif (isset($object['cc']) and \is_string($object['cc'])) {
-            $res[] = $object['cc'];
-        }
+        $targetTo = ArrayTool::wrapList($object['object']['to'] ?? []);
+        $targetCc = ArrayTool::wrapList($object['object']['cc'] ?? []);
 
-        if (isset($object['object']) and \is_array($object['object'])) {
-            if (isset($object['object']['to']) and \is_array($object['object']['to'])) {
-                $res = array_merge($res, $object['object']['to']);
-            } elseif (isset($object['object']['to']) and \is_string($object['object']['to'])) {
-                $res[] = $object['object']['to'];
-            }
-
-            if (isset($object['object']['cc']) and \is_array($object['object']['cc'])) {
-                $res = array_merge($res, $object['object']['cc']);
-            } elseif (isset($object['object']['cc']) and \is_string($object['object']['cc'])) {
-                $res[] = $object['object']['cc'];
-            }
-        }
-
-        $res = array_filter($res, fn ($i) => null !== $i and ActivityPubActivityInterface::PUBLIC_URL !== $i);
+        $res = array_filter(
+            array_merge($mainTo, $mainCc, $targetTo, $targetCc),
+            fn ($i) => !empty($i)
+                && \is_string($i)
+                && ActivityPubActivityInterface::PUBLIC_URL !== $i
+        );
 
         return array_unique($res);
     }

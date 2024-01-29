@@ -44,7 +44,7 @@ class EntryPageFactory
         }
 
         $cc = [];
-        if ($followersUrl = $entry->user->getFollowerUrl($this->client, $this->urlGenerator, null !== $entry->apId)) {
+        if ($followersUrl = $this->activityPubManager->getUserFollowerUrl($entry->user, null !== $entry->apId)) {
             $cc[] = $followersUrl;
         }
 

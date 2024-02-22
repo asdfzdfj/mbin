@@ -19,4 +19,12 @@ final class MagazineBoxComponent
     public bool $showMeta = true;
     public bool $showSectionTitle = false;
     public bool $stretchedLink = true;
+
+    public function getEmojiOptions(): array
+    {
+        return [
+            'enable' => true,
+            'domain' => $this->magazine->getApDomain() ?? 'local',
+        ];
+    }
 }

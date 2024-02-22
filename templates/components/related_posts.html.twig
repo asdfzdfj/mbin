@@ -7,12 +7,13 @@
                     <div class="row">
                         {% if post.image %}
                                 <img loading="lazy"
+                                    class="cover"
                                     src="{{ post.image.filePath ? (asset(post.image.filePath)|imagine_filter('post_thumb')) : post.image.sourceUrl }}"
                                     alt="{{ post.image.alt|default('') }}">
                         {% endif %}
                         {% if post.body %}
                             <blockquote class="content">
-                                {{ get_short_sentence(post.body)|markdown|raw }}
+                                {{ get_short_sentence(post.body)|markdown({emoji: {enable: true, domain: post.getApDomain() ?? 'local'}})|raw }}
                             </blockquote>
                         {% endif %}
                         <a href="{{ post_url(post) }}" class="stretched-link more">{{ 'show_more'|trans }}</a>

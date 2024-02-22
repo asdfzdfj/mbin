@@ -12,4 +12,12 @@ final class UserBoxComponent
 {
     public User $user;
     public bool $stretchedLink = true;
+
+    public function getEmojiOptions(): array
+    {
+        return [
+            'enable' => true,
+            'domain' => $this->user->getApDomain() ?? 'local',
+        ];
+    }
 }

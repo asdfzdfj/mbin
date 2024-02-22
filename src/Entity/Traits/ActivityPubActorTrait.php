@@ -65,4 +65,11 @@ trait ActivityPubActorTrait
     {
         return $this->publicKey;
     }
+
+    public function getApDomain(): ?string
+    {
+        return $this->apId
+            ? ($this->apDomain ?: parse_url($this->apProfileId, PHP_URL_HOST) ?: null)
+            : null;
+    }
 }

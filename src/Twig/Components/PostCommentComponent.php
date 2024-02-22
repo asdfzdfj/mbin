@@ -64,4 +64,12 @@ final class PostCommentComponent
 
         return false;
     }
+
+    public function getEmojiOptions(): array
+    {
+        return [
+            'enable' => true,
+            'domain' => $this->comment->getApDomain() ?? 'local',
+        ];
+    }
 }

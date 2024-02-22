@@ -7,10 +7,13 @@ namespace App\Markdown;
 use App\Markdown\CommonMark\CommunityLinkParser;
 use App\Markdown\CommonMark\DetailsBlockRenderer;
 use App\Markdown\CommonMark\DetailsBlockStartParser;
+use App\Markdown\CommonMark\EmojiParser;
+use App\Markdown\CommonMark\EmojiRenderer;
 use App\Markdown\CommonMark\ExternalImagesRenderer;
 use App\Markdown\CommonMark\ExternalLinkRenderer;
 use App\Markdown\CommonMark\MentionLinkParser;
 use App\Markdown\CommonMark\Node\DetailsBlock;
+use App\Markdown\CommonMark\Node\Emoji;
 use App\Markdown\CommonMark\Node\UnresolvableLink;
 use App\Markdown\CommonMark\TagLinkParser;
 use App\Markdown\CommonMark\UnresolvableLinkRenderer;
@@ -32,6 +35,8 @@ final class MarkdownExtension implements ConfigurableExtensionInterface
         private readonly UnresolvableLinkRenderer $unresolvableLinkRenderer,
         private readonly DetailsBlockStartParser $detailsBlockStartParser,
         private readonly DetailsBlockRenderer $detailsBlockRenderer,
+        private readonly EmojiParser $emojiParser,
+        private readonly EmojiRenderer $emojiRenderer,
     ) {
     }
 
@@ -39,6 +44,10 @@ final class MarkdownExtension implements ConfigurableExtensionInterface
     {
         $builder->addSchema('kbin', Expect::structure([
             'render_target' => Expect::type(RenderTarget::class),
+            'emoji' => Expect::structure([
+                'enable' => Expect::bool(true),
+                'domain' => Expect::string('local'),
+            ]),
         ]));
     }
 
@@ -50,9 +59,13 @@ final class MarkdownExtension implements ConfigurableExtensionInterface
         $environment->addInlineParser($this->mentionLinkParser);
         $environment->addInlineParser($this->tagLinkParser);
 
+        $environment->addInlineParser($this->emojiParser);
+
         $environment->addRenderer(Link::class, $this->linkRenderer, 1);
         $environment->addRenderer(Image::class, $this->imagesRenderer, 1);
         $environment->addRenderer(UnresolvableLink::class, $this->unresolvableLinkRenderer, 1);
         $environment->addRenderer(DetailsBlock::class, $this->detailsBlockRenderer, 1);
+
+        $environment->addRenderer(Emoji::class, $this->emojiRenderer, 1);
     }
 }

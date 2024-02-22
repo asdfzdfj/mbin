@@ -61,4 +61,12 @@ final class EntryComponent
 
         return false;
     }
+
+    public function getEmojiOptions(): array
+    {
+        return [
+            'enable' => true,
+            'domain' => $this->entry->getApDomain() ?? 'local',
+        ];
+    }
 }

@@ -88,4 +88,20 @@ class ApObjectExtractor
 
         return $body;
     }
+
+    /**
+     * get list of tagged objects, optionally filtered by type.
+     *
+     * @param array   $object object to extract tags from
+     * @param ?string $type   if specified, will only select tag object of this type
+     */
+    public static function getTagObjects(array $object, ?string $type): array
+    {
+        $tags = $object['tag'] ?? [];
+        if ($type && $tags) {
+            $tags = array_filter($tags, fn ($tag) => $type === $tag['type']);
+        }
+
+        return $tags;
+    }
 }

@@ -63,4 +63,12 @@ final class PostComponent
 
         return false;
     }
+
+    public function getEmojiOptions(): array
+    {
+        return [
+            'enable' => true,
+            'domain' => $this->post->getApDomain() ?? 'local',
+        ];
+    }
 }

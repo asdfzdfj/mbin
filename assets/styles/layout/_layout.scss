@@ -190,12 +190,23 @@ figure {
   margin: 0;
 }
 
+.emoji {
+  height: 1.8em;
+  vertical-align: middle;
+  object-fit: scale-down;
+  transition: .1s ease transform;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+}
+
 .rounded-edges {
   .section,
   .options,
   .alert,
   .btn,
-  figure img,
+  figure img:not(.emoji),
   input:not([type='radio']),
   textarea,
   select,

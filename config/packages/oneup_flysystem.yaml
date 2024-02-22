@@ -16,8 +16,21 @@ oneup_flysystem:
         #options:
         #  ACL: ''
 
+    # this is used to mainly get /emoji path prefix
+    mbin.emoji_adapter:
+      #local:
+      #  location: "%kernel.project_dir%/public/%uploads_dir_name%/emoji"
+      awss3v3:
+        client: kbin.s3_client
+        bucket: "%amazon.s3.bucket%"
+        prefix: 'emoji'
+
   filesystems:
     public_uploads_filesystem:
       #adapter: default_adapter
       adapter: kbin.s3_adapter
       alias: League\Flysystem\Filesystem
+
+    emoji:
+      adapter: mbin.emoji_adapter
+      visibility: public

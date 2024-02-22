@@ -28,7 +28,10 @@ final class ConvertMarkdownListener implements EventSubscriberInterface
 
     public function onConvertMarkdown(ConvertMarkdown $event): void
     {
-        $environment = $this->environmentFactory->createEnvironment($event->getRenderTarget());
+        $environment = $this->environmentFactory->createEnvironment(
+            $event->getRenderTarget(),
+            ['emoji' => $event->getAttribute('emoji')],
+        );
 
         $converter = $this->converterFactory->createConverter($environment);
         $html = $converter->convert($event->getMarkdown());

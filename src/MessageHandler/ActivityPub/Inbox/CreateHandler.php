@@ -10,10 +10,12 @@ use App\Entity\Post;
 use App\Entity\PostComment;
 use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
+use App\Message\ActivityPub\CreateEmojiMessage;
 use App\Message\ActivityPub\Inbox\ChainActivityMessage;
 use App\Message\ActivityPub\Inbox\CreateMessage;
 use App\Message\ActivityPub\Outbox\AnnounceMessage;
 use App\Repository\ApActivityRepository;
+use App\Service\ActivityPub\ApObjectExtractor as Extractor;
 use App\Service\ActivityPub\Note;
 use App\Service\ActivityPub\Page;
 use Psr\Log\LoggerInterface;
@@ -65,6 +67,10 @@ class CreateHandler
             $this->logger->info('Did not create the post, because the user is banned');
         } catch (TagBannedException) {
             $this->logger->info('Did not create the post, because one of the used tags is banned');
+        }
+
+        if ($emojis = Extractor::getTagObjects($message->payload, 'Emoji')) {
+            $this->bus->dispatch(new CreateEmojiMessage($emojis));
         }
     }
 

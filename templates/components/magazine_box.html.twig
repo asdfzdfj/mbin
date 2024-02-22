@@ -31,11 +31,11 @@
     </div>
     {{ component('magazine_sub', {magazine: magazine}) }}
     {% if computed.magazine.description and showDescription %}
-        <div class="content magazine__description">{{ computed.magazine.description|markdown|raw }}</div>
+        <div class="content magazine__description">{{ computed.magazine.description|markdown({emoji: emoji_option(computed.magazine)})|raw }}</div>
     {% endif %}
     {% if computed.magazine.rules and showRules %}
         <h3 class="mt-3">{{ 'rules'|trans }}</h3>
-        <div class="content magazine__rules">{{ computed.magazine.rules|markdown|raw }}</div>
+        <div class="content magazine__rules">{{ computed.magazine.rules|markdown({emoji: emoji_option(computed.magazine)})|raw }}</div>
     {% endif %}
     {% if showInfo %}
         <ul class="info">

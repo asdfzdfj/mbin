@@ -22,9 +22,9 @@ class EnvironmentFactory
     ) {
     }
 
-    public function createEnvironment(RenderTarget $renderTarget): EnvironmentInterface
+    public function createEnvironment(RenderTarget $renderTarget, array $attributes = []): EnvironmentInterface
     {
-        $this->config['kbin'] = ['render_target' => $renderTarget];
+        $this->config['kbin'] = array_merge(['render_target' => $renderTarget], $attributes);
 
         $env = new Environment($this->config);
 

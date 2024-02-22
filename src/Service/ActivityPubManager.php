@@ -26,6 +26,8 @@ use App\Message\ActivityPub\UpdateActorMessage;
 use App\Message\DeleteImageMessage;
 use App\Message\DeleteUserMessage;
 use App\Repository\ApActivityRepository;
+use App\Repository\EmojiIconRepository;
+use App\Repository\EmojiRepository;
 use App\Repository\EntryRepository;
 use App\Repository\ImageRepository;
 use App\Repository\MagazineRepository;
@@ -61,6 +63,9 @@ class ActivityPubManager
         private readonly SettingsManager $settingsManager,
         private readonly WebFingerFactory $webFingerFactory,
         private readonly MentionManager $mentionManager,
+        private readonly EmojiIconRepository $iconRepository,
+        private readonly EmojiRepository $emojiRepository,
+        private readonly EmojiManager $emojiManager,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly MessageBusInterface $bus,
         private readonly LoggerInterface $logger,

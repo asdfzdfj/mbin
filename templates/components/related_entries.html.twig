@@ -7,6 +7,7 @@
                     <div class="row">
                         {% if entry.image %}
                             <img loading="lazy"
+                                class="cover"
                                 src="{{ entry.image.filePath ? (asset(entry.image.filePath)|imagine_filter('entry_thumb')) : entry.image.sourceUrl }}"
                                 alt="{{ entry.image.alt|default('') }}">
                         {% endif %}

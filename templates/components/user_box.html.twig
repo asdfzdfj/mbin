@@ -73,7 +73,7 @@
         {% if user.about|length %}
             <div class="about">
                 <div class="content">
-                    {{ user.about|markdown|raw }}
+                    {{ user.about|markdown({emoji: emoji_option(user)})|raw }}
                 </div>
             </div>
         {% endif %}

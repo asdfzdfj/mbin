@@ -10,6 +10,7 @@ use App\Markdown\MarkdownConverter;
 use App\Markdown\RenderTarget;
 use App\Service\ActivityPub\ApHttpClient;
 use App\Service\ActivityPub\ContextsProvider;
+use App\Service\ActivityPub\Wrapper\EmojiWrapper;
 use App\Service\ActivityPub\Wrapper\ImageWrapper;
 use App\Service\ActivityPub\Wrapper\MentionsWrapper;
 use App\Service\ActivityPub\Wrapper\TagsWrapper;
@@ -27,6 +28,7 @@ class EntryPageFactory
         private readonly ImageWrapper $imageWrapper,
         private readonly TagsWrapper $tagsWrapper,
         private readonly MentionsWrapper $mentionsWrapper,
+        private readonly EmojiWrapper $emojiWrapper,
         private readonly ApHttpClient $client,
         private readonly ActivityPubManager $activityPubManager,
         private readonly MarkdownConverter $markdownConverter
@@ -75,7 +77,8 @@ class EntryPageFactory
             'url' => $this->getUrl($entry),
             'tag' => array_merge(
                 $this->tagsWrapper->build($tags),
-                $this->mentionsWrapper->build($entry->mentions ?? [], $entry->body)
+                $this->mentionsWrapper->build($entry->mentions ?? [], $entry->body),
+                $this->emojiWrapper->build($entry->getEmojis(), $entry->body),
             ),
             'commentsEnabled' => true,
             'sensitive' => $entry->isAdult(),

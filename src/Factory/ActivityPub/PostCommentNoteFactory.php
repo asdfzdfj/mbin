@@ -10,6 +10,7 @@ use App\Markdown\MarkdownConverter;
 use App\Markdown\RenderTarget;
 use App\Service\ActivityPub\ApHttpClient;
 use App\Service\ActivityPub\ContextsProvider;
+use App\Service\ActivityPub\Wrapper\EmojiWrapper;
 use App\Service\ActivityPub\Wrapper\ImageWrapper;
 use App\Service\ActivityPub\Wrapper\MentionsWrapper;
 use App\Service\ActivityPub\Wrapper\TagsWrapper;
@@ -27,6 +28,7 @@ class PostCommentNoteFactory
         private readonly GroupFactory $groupFactory,
         private readonly TagsWrapper $tagsWrapper,
         private readonly MentionsWrapper $mentionsWrapper,
+        private readonly EmojiWrapper $emojiWrapper,
         private readonly MentionManager $mentionManager,
         private readonly ApHttpClient $client,
         private readonly ActivityPubManager $activityPubManager,
@@ -71,7 +73,8 @@ class PostCommentNoteFactory
             'url' => $this->getActivityPubId($comment),
             'tag' => array_merge(
                 $this->tagsWrapper->build($tags),
-                $this->mentionsWrapper->build($comment->mentions ?? [], $comment->body)
+                $this->mentionsWrapper->build($comment->mentions ?? [], $comment->body),
+                $this->emojiWrapper->build($comment->getEmojis(), $comment->body),
             ),
             'published' => $comment->createdAt->format(DATE_ATOM),
         ]);

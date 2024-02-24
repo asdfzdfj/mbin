@@ -39,6 +39,7 @@ class EntryCommentDto
     public ?string $ip = null;
     public ?string $apId = null;
     public ?array $mentions = null;
+    public ?array $emojis = null;
     public ?\DateTimeImmutable $createdAt = null;
     public ?\DateTimeImmutable $editedAt = null;
     public ?\DateTime $lastActive = null;

@@ -74,6 +74,7 @@ $comment-margin-sm: .3rem;
   .aside {
     grid-area: aside;
     display: flex;
+    justify-content: flex-end;
     gap: .5rem;
   }
 

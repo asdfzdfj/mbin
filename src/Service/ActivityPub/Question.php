@@ -132,6 +132,10 @@ class Question
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
             }
 
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
             return $this->entryCommentManager->create(
                 $dto,
                 $actor,
@@ -202,6 +206,10 @@ class Question
                 $this->handleSensitiveMedia($dto, $object['sensitive']);
             }
 
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
             return $this->postManager->create(
                 $dto,
                 $actor,
@@ -242,6 +250,10 @@ class Question
             $this->handleDate($dto, $object['published']);
             if (isset($object['sensitive'])) {
                 $this->handleSensitiveMedia($dto, $object['sensitive']);
+            }
+
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
             }
 
             return $this->postCommentManager->create(

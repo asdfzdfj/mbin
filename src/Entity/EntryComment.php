@@ -76,6 +76,8 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
     #[Column(type: 'string', nullable: true)]
     public ?string $ip = null;
     #[Column(type: 'json', nullable: true)]
+    public ?array $emojis = null;
+    #[Column(type: 'json', nullable: true)]
     public ?array $mentions = null;
     #[OneToMany(mappedBy: 'parent', targetEntity: EntryComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[OrderBy(['createdAt' => 'ASC'])]
@@ -232,6 +234,11 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
             ->where(Criteria::expr()->eq('user', $user));
 
         return $this->favourites->matching($criteria)->count() > 0;
+    }
+
+    public function getEmojis(): array
+    {
+        return array_values($this->emojis ?? []);
     }
 
     public function __sleep()

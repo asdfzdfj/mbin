@@ -7,6 +7,8 @@ namespace App\Service;
 use App\Entity\Emoji;
 use App\Entity\EmojiIcon;
 use App\Exception\CorruptedFileException;
+use App\Markdown\CommonMark\Node\Emoji as EmojiNode;
+use App\Markdown\MarkdownConverter;
 use App\Repository\EmojiIconRepository;
 use App\Repository\EmojiRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +34,7 @@ class EmojiManager
         private readonly EntityManagerInterface $entityManager,
         private readonly EmojiIconRepository $iconRepository,
         private readonly EmojiRepository $emojiRepository,
+        private readonly MarkdownConverter $markdownConverter,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -222,5 +225,19 @@ class EmojiManager
         } catch (\Exception $e) {
             return 'none';
         }
+    }
+
+    public function extractFromBody(string $markdown): ?array
+    {
+        $emojis = [];
+        $document = $this->markdownConverter->parse($markdown);
+
+        foreach ($document->iterator() as $node) {
+            if ($node instanceof EmojiNode) {
+                $emojis[] = $node->data->get('shortcode', trim($node->getLiteral(), ':'));
+            }
+        }
+
+        return array_unique($emojis) ?: null;
     }
 }

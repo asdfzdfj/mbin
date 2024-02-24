@@ -49,7 +49,8 @@ class PostManager implements ContentManagerInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly PostRepository $postRepository,
         private readonly ImageRepository $imageRepository,
-        private readonly CacheInterface $cache
+        private readonly CacheInterface $cache,
+        private readonly EmojiManager $emojiManager,
     ) {
     }
 
@@ -78,6 +79,9 @@ class PostManager implements ContentManagerInterface
         }
         $post->tags = $dto->body ? $this->tagManager->extract($dto->body, $post->magazine->name) : null;
         $post->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
+        $post->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $post->visibility = $dto->visibility;
         $post->apId = $dto->apId;
         $post->magazine->lastActive = new \DateTime();
@@ -109,6 +113,9 @@ class PostManager implements ContentManagerInterface
             $post->image = $this->imageRepository->find($dto->image->id);
         }
         $post->tags = $dto->body ? $this->tagManager->extract($dto->body, $post->magazine->name) : null;
+        $post->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $post->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
         $post->visibility = $dto->visibility;
         $post->editedAt = new \DateTimeImmutable('@'.time());

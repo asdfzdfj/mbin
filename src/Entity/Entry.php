@@ -116,6 +116,8 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
     public ?array $tags = null;
     #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
     public ?array $mentions = null;
+    #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
+    public ?array $emojis = null;
     #[OneToMany(mappedBy: 'entry', targetEntity: EntryComment::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $comments;
     #[OneToMany(mappedBy: 'entry', targetEntity: EntryVote::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
@@ -397,6 +399,11 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
     public function getTags(): array
     {
         return array_values($this->tags ?? []);
+    }
+
+    public function getEmojis(): array
+    {
+        return array_values($this->emojis ?? []);
     }
 
     public function __sleep()

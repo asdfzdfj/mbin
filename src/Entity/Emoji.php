@@ -76,4 +76,9 @@ class Emoji
     {
         return !empty($this->apId);
     }
+
+    public function formatShortcode(): string
+    {
+        return ":{$this->shortcode}:";
+    }
 }

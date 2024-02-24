@@ -25,6 +25,7 @@ interface ActivityPubActivityInterface
         // objects
         'Hashtag' => 'as:Hashtag',
         'PropertyValue' => 'schema:PropertyValue',
+        'Emoji' => 'toot:Emoji',
         // properties
         'manuallyApprovesFollowers' => 'as:manuallyApprovesFollowers',
         'sensitive' => 'as:sensitive',

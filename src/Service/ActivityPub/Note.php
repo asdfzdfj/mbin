@@ -129,6 +129,10 @@ class Note
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
             }
 
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
             return $this->entryCommentManager->create(
                 $dto,
                 $actor,
@@ -209,6 +213,10 @@ class Note
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
             }
 
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
             return $this->postManager->create(
                 $dto,
                 $actor,
@@ -255,6 +263,10 @@ class Note
                 $dto->lang = array_keys($object['contentMap'])[0];
             } else {
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
+            }
+
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
             }
 
             return $this->postCommentManager->create(

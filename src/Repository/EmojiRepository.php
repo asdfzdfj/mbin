@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
  * @method Emoji|null findOneBy(array $criteria, array $orderBy = null)
  * @method Emoji[]    findAll()
  * @method Emoji[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Emoji|null findOneByApId(string $apId)
  */
 class EmojiRepository extends ServiceEntityRepository
 {
@@ -43,18 +44,11 @@ class EmojiRepository extends ServiceEntityRepository
      */
     public function findOneByShortcode(string $shortcode, string $domain = 'local'): ?Emoji
     {
-        $query = $this
-            ->createQueryBuilder('e')
-            ->andWhere('e.shortcode = :shortcode')
-            ->andWhere('e.apDomain = :domain')
-            ->setParameter('shortcode', $shortcode)
-            ->setParameter('domain', $domain);
-
-        return $query->getQuery()->getOneOrNullResult();
+        return $this->findOneBy(['apDomain' => $domain, 'shortcode' => $shortcode]);
     }
 
     /**
-     * get a list of all known emojis for a domain.
+     * get a mapping of all known emojis by domain.
      *
      * @param string $domain the domain to search for this shortcode,
      *                       using special value `local` to search for local custom emojis
@@ -71,6 +65,11 @@ class EmojiRepository extends ServiceEntityRepository
         return $query->getQuery()->getResult();
     }
 
+    /**
+     * get a mapping of all known emojis on local instance.
+     *
+     * @return array<string, Emoji> an arrray mapping of shortcode => Emoji entity
+     */
     public function findAllLocal(): array
     {
         return $this->findAllByDomain('local');

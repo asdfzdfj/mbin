@@ -79,6 +79,8 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
     #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
     public ?array $tags = null;
     #[Column(type: 'json', nullable: true)]
+    public ?array $emojis = null;
+    #[Column(type: 'json', nullable: true)]
     public ?array $mentions = null;
     #[OneToMany(mappedBy: 'parent', targetEntity: EntryComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[OrderBy(['createdAt' => 'ASC'])]
@@ -237,6 +239,11 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
     public function getTags(): array
     {
         return array_values($this->tags ?? []);
+    }
+
+    public function getEmojis(): array
+    {
+        return array_values($this->emojis ?? []);
     }
 
     public function __sleep()

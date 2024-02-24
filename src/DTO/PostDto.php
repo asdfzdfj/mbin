@@ -38,6 +38,7 @@ class PostDto implements ContentVisibilityInterface
     public ?string $ip = null;
     public ?array $tags = null;
     public ?array $mentions = null;
+    public ?array $emojis = null;
     public ?string $apId = null;
     public ?\DateTimeImmutable $createdAt = null;
     public ?\DateTimeImmutable $editedAt = null;

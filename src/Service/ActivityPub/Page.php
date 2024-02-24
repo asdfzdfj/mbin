@@ -89,6 +89,10 @@ class Page
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
             }
 
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
             $this->logger->debug('creating page');
 
             return $this->entryManager->create(

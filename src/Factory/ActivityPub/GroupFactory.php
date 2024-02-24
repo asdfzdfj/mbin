@@ -6,6 +6,7 @@ namespace App\Factory\ActivityPub;
 
 use App\Entity\Magazine;
 use App\Service\ActivityPub\ContextsProvider;
+use App\Service\ActivityPub\Wrapper\EmojiWrapper;
 use App\Service\ImageManager;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -14,7 +15,8 @@ class GroupFactory
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly ContextsProvider $contextProvider,
-        private readonly ImageManager $imageManager
+        private readonly ImageManager $imageManager,
+        private readonly EmojiWrapper $emojiWrapper,
     ) {
     }
 
@@ -67,6 +69,12 @@ class GroupFactory
                 $magazine->lastActive->format(DATE_ATOM)
                 : $magazine->createdAt->format(DATE_ATOM),
         ];
+
+        if ($magazine->description) {
+            if ($emojis = $this->emojiWrapper->build(null, $magazine->description)) {
+                $group['tag'] = array_merge($group['tag'] ?? [], $emojis);
+            }
+        }
 
         if ($magazine->icon) {
             $group['icon'] = [

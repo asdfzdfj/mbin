@@ -53,7 +53,8 @@ class EntryManager implements ContentManagerInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly EntryRepository $entryRepository,
         private readonly ImageRepository $imageRepository,
-        private readonly CacheInterface $cache
+        private readonly CacheInterface $cache,
+        private readonly EmojiManager $emojiManager,
     ) {
     }
 
@@ -86,6 +87,9 @@ class EntryManager implements ContentManagerInterface
             $entry->magazine->name
         ) : null;
         $entry->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
+        $entry->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $entry->visibility = $dto->visibility;
         $entry->apId = $dto->apId;
         $entry->magazine->lastActive = new \DateTime();
@@ -159,6 +163,9 @@ class EntryManager implements ContentManagerInterface
             $entry->magazine->name
         ) : null;
         $entry->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
+        $entry->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $entry->isOc = $dto->isOc;
         $entry->lang = $dto->lang;
         $entry->editedAt = new \DateTimeImmutable('@'.time());

@@ -38,6 +38,7 @@ class EntryCommentManager implements ContentManagerInterface
         private readonly MessageBusInterface $bus,
         private readonly EntityManagerInterface $entityManager,
         private readonly ImageRepository $imageRepository,
+        private readonly EmojiManager $emojiManager,
     ) {
     }
 
@@ -67,6 +68,9 @@ class EntryCommentManager implements ContentManagerInterface
         $comment->mentions = $dto->body
             ? array_merge($dto->mentions ?? [], $this->mentionManager->handleChain($comment))
             : $dto->mentions;
+        $comment->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $comment->visibility = $dto->visibility;
         $comment->apId = $dto->apId;
         $comment->magazine->lastActive = new \DateTime();
@@ -102,6 +106,9 @@ class EntryCommentManager implements ContentManagerInterface
         $comment->mentions = $dto->body
             ? array_merge($dto->mentions ?? [], $this->mentionManager->handleChain($comment))
             : $dto->mentions;
+        $comment->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $comment->visibility = $dto->visibility;
         $comment->editedAt = new \DateTimeImmutable('@'.time());
         if (empty($comment->body) && null === $comment->image) {

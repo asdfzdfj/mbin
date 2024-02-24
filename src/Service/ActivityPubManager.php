@@ -388,6 +388,10 @@ class ActivityPubManager
                 }
             }
 
+            if (!empty($actor['tag'])) {
+                $this->handleEmojis($actor['tag']);
+            }
+
             // Write to DB
             $this->entityManager->flush();
 
@@ -397,6 +401,31 @@ class ActivityPubManager
         }
 
         return null;
+    }
+
+    /**
+     * @return array of emoji shortcodes with `:` trimmed,
+     *               or null if there wasn't any emoji to be found
+     */
+    public function handleEmojis(array $tags): ?array
+    {
+        $tags = !array_is_list($tags) ? [$tags] : $tags;
+        $emojis = array_filter($tags, fn ($tag) => 'Emoji' === $tag['type']);
+        $shortcodes = [];
+
+        foreach ($emojis as $emoji) {
+            $entity = $this->emojiManager->createEmojiFromObject($emoji, null);
+            $shortcode = $entity->shortcode;
+
+            if ($entity && empty($shortcodes[$shortcode])) {
+                $this->emojiRepository->save($entity, false);
+                $shortcodes[$shortcode] = $entity;
+            }
+        }
+
+        $this->entityManager->flush();
+
+        return $emojis ? array_keys($shortcodes) : null;
     }
 
     public function handleImages(array $attachment): ?Image
@@ -574,6 +603,10 @@ class ActivityPubManager
                     }
                 } catch (InvalidApPostException $ignored) {
                 }
+            }
+
+            if (!empty($actor['tag'])) {
+                $this->handleEmojis($actor['tag']);
             }
 
             $this->entityManager->flush();

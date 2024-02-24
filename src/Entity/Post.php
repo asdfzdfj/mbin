@@ -86,6 +86,8 @@ class Post implements VotableInterface, CommentInterface, VisibilityInterface, R
     public ?array $tags = null;
     #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
     public ?array $mentions = null;
+    #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
+    public ?array $emojis = null;
     #[OneToMany(mappedBy: 'post', targetEntity: PostComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     public Collection $comments;
     #[OneToMany(mappedBy: 'post', targetEntity: PostVote::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
@@ -354,6 +356,11 @@ class Post implements VotableInterface, CommentInterface, VisibilityInterface, R
     public function getTags(): array
     {
         return array_values($this->tags ?? []);
+    }
+
+    public function getEmojis(): array
+    {
+        return array_values($this->emojis ?? []);
     }
 
     public function __sleep()

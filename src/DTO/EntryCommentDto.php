@@ -42,6 +42,7 @@ class EntryCommentDto
     public ?int $apDislikeCount = null;
     public ?int $apShareCount = null;
     public ?array $mentions = null;
+    public ?array $emojis = null;
     public ?\DateTimeImmutable $createdAt = null;
     public ?\DateTimeImmutable $editedAt = null;
     public ?\DateTime $lastActive = null;

@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
  * @method Emoji|null findOneBy(array $criteria, array $orderBy = null)
  * @method Emoji[]    findAll()
  * @method Emoji[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Emoji|null findOneByApId(string $apId)
  */
 class EmojiRepository extends ServiceEntityRepository
 {
@@ -35,9 +36,22 @@ class EmojiRepository extends ServiceEntityRepository
     }
 
     /**
+     * lookup emojis by list of shortcodes scoped to a domain.
+     *
+     * @param string $domain the domain to search for this shortcode,
+     *                       using special value `local` to search for local custom emojis
+     *
+     * @return Emoji[] found emojis with matching shortcodes for that domain
+     */
+    public function findByShortcodes(array $shortcodes, string $domain = 'local'): array
+    {
+        return $this->findBy(['apDomain' => $domain, 'shortcode' => $shortcodes]);
+    }
+
+    /**
      * lookup a single emoji by shortcode scoped to a domain.
      *
-     * @param string $shortcode the emoji shortcode (without enclosing `:`) to search for
+     * @param string $shortcode the emoji shortcode to search for, without enclosing `:`
      * @param string $domain    the domain to search for this shortcode,
      *                          using special value `local` to search for local custom emojis
      */
@@ -49,7 +63,7 @@ class EmojiRepository extends ServiceEntityRepository
     }
 
     /**
-     * get a list of all known emojis for a domain.
+     * get a mapping of all known emojis by domain.
      *
      * @param string $domain the domain to search for this shortcode,
      *                       using special value `local` to search for local custom emojis
@@ -66,6 +80,11 @@ class EmojiRepository extends ServiceEntityRepository
         return $query->getQuery()->getResult();
     }
 
+    /**
+     * get a mapping of all known emojis on local instance.
+     *
+     * @return array<string, Emoji> an arrray mapping of shortcode => Emoji entity
+     */
     public function findAllLocal(): array
     {
         return $this->findAllByDomain('local');

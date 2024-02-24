@@ -75,6 +75,8 @@ class PostComment implements VotableInterface, VisibilityInterface, ReportInterf
     public ?string $ip = null;
     #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
     public ?array $mentions = null;
+    #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
+    public ?array $emojis = null;
     #[Column(type: 'boolean', nullable: false)]
     public bool $isAdult = false;
     #[Column(type: 'boolean', nullable: false, options: ['default' => false])]
@@ -229,6 +231,11 @@ class PostComment implements VotableInterface, VisibilityInterface, ReportInterf
     public function getTags(): array
     {
         return array_values($this->tags ?? []);
+    }
+
+    public function getEmojis(): array
+    {
+        return array_values($this->emojis ?? []);
     }
 
     public function __sleep()

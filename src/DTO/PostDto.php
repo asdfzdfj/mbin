@@ -37,6 +37,7 @@ class PostDto implements ContentVisibilityInterface
     public ?string $visibility = VisibilityInterface::VISIBILITY_VISIBLE;
     public ?string $ip = null;
     public ?array $mentions = null;
+    public ?array $emojis = null;
     public ?string $apId = null;
     public ?int $apLikeCount = null;
     public ?int $apDislikeCount = null;

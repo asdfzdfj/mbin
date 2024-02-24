@@ -153,7 +153,15 @@ class Note
             $dto->apDislikeCount = $this->activityPubManager->extractRemoteDislikeCount($object);
             $dto->apShareCount = $this->activityPubManager->extractRemoteShareCount($object);
 
-            return $this->entryCommentManager->create($dto, $actor, false);
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
+            return $this->entryCommentManager->create(
+                $dto,
+                $actor,
+                false
+            );
         } else {
             throw new \Exception('Actor could not be found for entry comment.');
         }
@@ -240,7 +248,15 @@ class Note
             $dto->apDislikeCount = $this->activityPubManager->extractRemoteDislikeCount($object);
             $dto->apShareCount = $this->activityPubManager->extractRemoteShareCount($object);
 
-            return $this->postManager->create($dto, $actor, false, $stickyIt);
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
+            return $this->postManager->create(
+                $dto,
+                $actor,
+                false
+            );
         } else {
             throw new \Exception('Actor could not be found for post.');
         }
@@ -298,7 +314,15 @@ class Note
             $dto->apDislikeCount = $this->activityPubManager->extractRemoteDislikeCount($object);
             $dto->apShareCount = $this->activityPubManager->extractRemoteShareCount($object);
 
-            return $this->postCommentManager->create($dto, $actor, false);
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
+            return $this->postCommentManager->create(
+                $dto,
+                $actor,
+                false
+            );
         } else {
             throw new \Exception('Actor could not be found for post comment.');
         }

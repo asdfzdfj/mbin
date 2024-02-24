@@ -51,6 +51,7 @@ class EntryDto implements ContentVisibilityInterface
     public ?int $apDislikeCount = null;
     public ?int $apShareCount = null;
     public ?array $tags = null;
+    public ?array $emojis = null;
     public ?\DateTimeImmutable $createdAt = null;
     public ?\DateTimeImmutable $editedAt = null;
     public ?\DateTime $lastActive = null;

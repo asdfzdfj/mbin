@@ -54,7 +54,8 @@ class PostManager implements ContentManagerInterface
         private readonly ImageRepository $imageRepository,
         private readonly ApHttpClient $apHttpClient,
         private readonly SettingsManager $settingsManager,
-        private readonly CacheInterface $cache
+        private readonly CacheInterface $cache,
+        private readonly EmojiManager $emojiManager,
     ) {
     }
 
@@ -92,6 +93,9 @@ class PostManager implements ContentManagerInterface
             $post->image->altText = $dto->imageAlt;
         }
         $post->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
+        $post->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $post->visibility = $dto->visibility;
         $post->apId = $dto->apId;
         $post->apLikeCount = $dto->apLikeCount;
@@ -144,6 +148,9 @@ class PostManager implements ContentManagerInterface
             $post->image = $this->imageRepository->find($dto->image->id);
         }
         $this->tagManager->updatePostTags($post, $this->tagExtractor->extract($dto->body) ?? []);
+        $post->emojis = $dto->body
+            ? $this->emojiManager->extractFromBody($dto->body)
+            : null;
         $post->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
         $post->visibility = $dto->visibility;
         $post->editedAt = new \DateTimeImmutable('@'.time());

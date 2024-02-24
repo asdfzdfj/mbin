@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Markdown\MarkdownConverter;
 use App\Markdown\RenderTarget;
 use App\Service\ActivityPub\ContextsProvider;
+use App\Service\ActivityPub\Wrapper\EmojiWrapper;
 use App\Service\ImageManager;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -17,7 +18,8 @@ class PersonFactory
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly ContextsProvider $contextProvider,
         private readonly ImageManager $imageManager,
-        private readonly MarkdownConverter $markdownConverter
+        private readonly MarkdownConverter $markdownConverter,
+        private readonly EmojiWrapper $emojiWrapper,
     ) {
     }
 
@@ -76,6 +78,10 @@ class PersonFactory
                 $user->about,
                 [MarkdownConverter::RENDER_TARGET => RenderTarget::ActivityPub],
             );
+
+            if ($emojis = $this->emojiWrapper->build(null, $user->about)) {
+                $person['tag'] = array_merge($person['tag'] ?? [], $emojis);
+            }
         }
 
         if ($user->cover) {

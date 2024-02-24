@@ -106,6 +106,10 @@ class Page
             $dto->apDislikeCount = $this->activityPubManager->extractRemoteDislikeCount($object);
             $dto->apShareCount = $this->activityPubManager->extractRemoteShareCount($object);
 
+            if (!empty($object['tag'])) {
+                $dto->emojis = $this->activityPubManager->handleEmojis($object['tag']);
+            }
+
             $this->logger->debug('creating page');
 
             return $this->entryManager->create($dto, $actor, false, $stickyIt);

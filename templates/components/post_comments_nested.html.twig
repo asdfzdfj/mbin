@@ -7,7 +7,7 @@
         }) }}
     {% endfor %}
 {% else %}
-    {% for reply in comment.children %}
+    {% for reply in comment.children|sort_author_first(comment) %}
         {{ component('post_comment', {
             comment: reply,
             showNested: true,

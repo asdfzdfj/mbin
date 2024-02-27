@@ -9,7 +9,9 @@ use App\Entity\EntryComment;
 use App\Entity\Magazine;
 use App\Entity\Post;
 use App\Entity\PostComment;
+use App\Twig\Runtime\SubjectExtensionRuntime;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 use Twig\TwigTest;
 
 class SubjectExtension extends AbstractExtension
@@ -42,6 +44,13 @@ class SubjectExtension extends AbstractExtension
                     return $subject instanceof Magazine;
                 }
             ),
+        ];
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            new TwigFilter('sort_author_first', [SubjectExtensionRuntime::class, 'sortAuthorFirst']),
         ];
     }
 }

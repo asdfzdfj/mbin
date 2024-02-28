@@ -5,9 +5,15 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Emoji;
+use App\PageView\EmojiPageView;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Pagerfanta\Pagerfanta;
+use Pagerfanta\PagerfantaInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @extends ServiceEntityRepository<Emoji>
@@ -88,5 +94,48 @@ class EmojiRepository extends ServiceEntityRepository
     public function findAllLocal(): array
     {
         return $this->findAllByDomain('local');
+    }
+
+    public function getCategories(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->select('e.category')->distinct()
+            ->andWhere('e.category IS NOT NULL')
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
+    public function findPaginated(EmojiPageView $criteria, string $domain = 'local'): PagerfantaInterface
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->where('e.apDomain = :domain')
+            ->setParameter('domain', $domain);
+
+        if ($criteria->query) {
+            $qb->andWhere('LOWER(e.shortcode) LIKE :query')
+               ->setParameter('query', '%'.addcslashes(trim($criteria->query), '%_\\').'%');
+        }
+
+        if ($criteria->category) {
+            if (EmojiPageView::CATEGORY_UNCATEGORIZED === $criteria->category) {
+                $qb->andWhere('e.category IS NULL');
+            } else {
+                $qb->andWhere('e.category = :cat')
+                   ->setParameter('cat', trim($criteria->category));
+            }
+        }
+
+        $qb->addOrderBy('e.shortcode', 'ASC');
+
+        $pagerfanta = new Pagerfanta(new QueryAdapter($qb));
+
+        try {
+            $pagerfanta->setMaxPerPage($criteria->perPage ?? EmojiPageView::PER_PAGE);
+            $pagerfanta->setCurrentPage($criteria->page);
+        } catch (NotValidCurrentPageException $e) {
+            throw new NotFoundHttpException();
+        }
+
+        return $pagerfanta;
     }
 }

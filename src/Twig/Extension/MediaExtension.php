@@ -14,6 +14,7 @@ class MediaExtension extends AbstractExtension
     {
         return [
             new TwigFunction('uploaded_asset', [MediaExtensionRuntime::class, 'getPublicPath']),
+            new TwigFunction('emoji_asset', [MediaExtensionRuntime::class, 'getEmoijPath']),
         ];
     }
 }

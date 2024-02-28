@@ -398,34 +398,6 @@ class ActivityPubManager
         return null;
     }
 
-    public function handleImages(array $attachment): ?Image
-    {
-        $images = array_filter(
-            $attachment,
-            fn ($val) => $this->isImageAttachment($val)
-        ); // @todo multiple images
-
-        if (\count($images)) {
-            try {
-                if ($tempFile = $this->imageManager->download($images[0]['url'])) {
-                    $image = $this->imageRepository->findOrCreateFromPath($tempFile);
-                    $image->sourceUrl = $images[0]['url'];
-                    if ($image && isset($images[0]['name'])) {
-                        $image->altText = $images[0]['name'];
-                    }
-                    $this->entityManager->persist($image);
-                    $this->entityManager->flush();
-                }
-            } catch (\Exception $e) {
-                return null;
-            }
-
-            return $image ?? null;
-        }
-
-        return null;
-    }
-
     /**
      * Creates a new magazine (Group).
      *
@@ -724,18 +696,40 @@ class ActivityPubManager
         return array_map(fn ($user) => $user->apInboxUrl, $users);
     }
 
+    public function handleImages(array $attachment): ?Image
+    {
+        $images = array_filter($attachment, fn ($val) => $this->isImageAttachment($val)); // @todo multiple images
+
+        if (\count($images)) {
+            try {
+                if ($tempFile = $this->imageManager->download($images[0]['url'])) {
+                    $image = $this->imageRepository->findOrCreateFromPath($tempFile);
+                    $image->sourceUrl = $images[0]['url'];
+                    if ($image && isset($images[0]['name'])) {
+                        $image->altText = $images[0]['name'];
+                    }
+                    $this->entityManager->persist($image);
+                    $this->entityManager->flush();
+                }
+            } catch (\Exception $e) {
+                return null;
+            }
+
+            return $image ?? null;
+        }
+
+        return null;
+    }
+
     public function handleVideos(array $attachment): ?VideoDto
     {
-        $videos = array_filter(
-            $attachment,
-            fn ($val) => \in_array($val['type'], ['Document', 'Video']) && VideoManager::isVideoUrl($val['url'])
-        );
+        $videos = array_filter($attachment, fn ($val) => $this->isVideoAttachment($val));
 
         if (\count($videos)) {
             return (new VideoDto())->create(
                 $videos[0]['url'],
                 $videos[0]['mediaType'],
-                !empty($videos['0']['name']) ? $videos['0']['name'] : $videos['0']['mediaType']
+                !empty($videos[0]['name']) ? $videos[0]['name'] : $videos[0]['mediaType']
             );
         }
 
@@ -744,10 +738,7 @@ class ActivityPubManager
 
     public function handleExternalImages(array $attachment): ?array
     {
-        $images = array_filter(
-            $attachment,
-            fn ($val) => $this->isImageAttachment($val)
-        );
+        $images = array_filter($attachment, fn ($val) => $this->isImageAttachment($val));
 
         array_shift($images);
 
@@ -764,10 +755,7 @@ class ActivityPubManager
 
     public function handleExternalVideos(array $attachment): ?array
     {
-        $videos = array_filter(
-            $attachment,
-            fn ($val) => \in_array($val['type'], ['Document', 'Video']) && VideoManager::isVideoUrl($val['url'])
-        );
+        $videos = array_filter($attachment, fn ($val) => $this->isVideoAttachment($val));
 
         if (\count($videos)) {
             return array_map(fn ($val) => (new VideoDto())->create(
@@ -876,16 +864,27 @@ class ActivityPubManager
 
     private function isImageAttachment(array $object): bool
     {
-        // attachment object has acceptable object type
-        if (!\in_array($object['type'], ['Document', 'Image'])) {
-            return false;
-        }
+        $mediaType = $object['mediaType'] ?? '';
+        $isKnownImageType = ImageManager::isImageType($mediaType);
 
-        // attachment is either:
-        // - has `mediaType` field and is a recognized image types
-        // - image url looks like a link to image
-        return (!empty($object['mediaType']) && ImageManager::isImageType($object['mediaType']))
-            || ImageManager::isImageUrl($object['url']);
+        // image handling is/should throw on non image so it's a bit safe to take their word for it
+        // but might as well filters out unrecognized mediaType if specified
+        return match ($object['type'] ?? null) {
+            'Image' => $mediaType ? $isKnownImageType : true,
+            'Document' => $isKnownImageType || ImageManager::isImageUrl($object['url']),
+            default => false,
+        };
+    }
+
+    private function isVideoAttachment(array $object): bool
+    {
+        // we dont store videos (yet) so it's should be safe to take their word for it
+        return match ($object['type'] ?? null) {
+            'Video' => true,
+            'Document' => VideoManager::isVideoType($object['mediaType'] ?? '')
+                || VideoManager::isVideoUrl($object['url']),
+            default => false,
+        };
     }
 
     /**

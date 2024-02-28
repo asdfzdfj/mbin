@@ -10,10 +10,20 @@ class VideoManager
 
     public static function isVideoUrl(string $url): bool
     {
-        $urlExt = pathinfo($url, PATHINFO_EXTENSION);
+        $path = parse_url($url, PHP_URL_PATH);
+        if (!$path) {
+            return false;
+        }
+
+        $urlExt = mb_strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
         $types = array_map(fn ($type) => str_replace('video/', '', $type), self::VIDEO_MIMETYPES);
 
         return \in_array($urlExt, $types);
+    }
+
+    public static function isVideoType(string $mediaType): bool
+    {
+        return \in_array($mediaType, self::VIDEO_MIMETYPES);
     }
 }

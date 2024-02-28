@@ -724,16 +724,23 @@ class ActivityPubManager
 
     private function isImageAttachment(array $object): bool
     {
+        $type = $object['type'];
         // attachment object has acceptable object type
-        if (!\in_array($object['type'], ['Document', 'Image'])) {
+        if (!\in_array($type, ['Document', 'Image'])) {
             return false;
         }
 
         // attachment is either:
+        // - have type of `Image`
+        //   (kind of have to trust them on this one, if it's not then the
+        //   downloaded image should *or MUST* nulls out)
         // - has `mediaType` field and is a recognized image types
         // - image url looks like a link to image
-        return (!empty($object['mediaType']) && ImageManager::isImageType($object['mediaType']))
-            || ImageManager::isImageUrl($object['url']);
+        return match ($type) {
+            'Image' => true,
+            'Document' => ImageManager::isImageType($object['mediaType'] ?? '')
+                || ImageManager::isImageUrl($object['url']),
+        };
     }
 
     /**

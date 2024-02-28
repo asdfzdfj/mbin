@@ -1,0 +1,6 @@
+---
+
+emoji_list:
+    controller: App\Controller\EmojiListController
+    path: /emojis
+    methods: [GET]

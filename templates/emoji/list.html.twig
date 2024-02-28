@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{%- block title -%}
+    {{- 'emojis'|trans }} - {{ parent() -}}
+{%- endblock -%}
+
+{% block mainClass %}page-emojis page-settings{% endblock %}
+
+{% block header_nav %}
+{% endblock %}
+
+{% block sidebar_top %}
+{% endblock %}
+
+{% block body %}
+    <header>
+        <h1 hidden>{{ 'emojis'|trans }}</h1>
+    </header>
+    <div class="section section--top">
+        <div class="container">
+            {{ form_start(form) }}
+
+            <div class="flex" style="align-items: center">
+                {{ form_widget(form.query) }}
+                <button class="btn btn__primary" type="submit" title="{{ 'search'|trans }}" aria-label="{{ 'search'|trans }}">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="flex flex-wrap">
+                {{ form_widget(form.category, {attr: {'aria-label': 'filter.emoji.category.label'|trans}}) }}
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <div class="section emoji-columns">
+        <ul>
+            {% for emoji in emojis %}
+                <li class="emoji-preview">
+                    <div class="emoji-preview__icon">
+                        <img class="emoji" loading="lazy" src="{{ emoji_asset(emoji) }}"/>
+                    </div>
+                    <div class="emoji-preview__info">
+                        <p class="shortcode"><code>{{ emoji.formatShortcode }}</code></p>
+                        {% if not criteria.category %}
+                            <small>{{ emoji.category|default('emoji_uncategorized'|trans) }}</small>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% if emojis.haveToPaginate is defined and emojis.haveToPaginate %}
+        {{ pagerfanta(emojis, null, {'pageParameter':'[p]'}) }}
+    {% endif %}
+{% endblock %}
+

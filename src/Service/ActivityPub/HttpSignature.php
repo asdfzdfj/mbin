@@ -17,6 +17,8 @@ class HttpSignature
 {
     /**
      * Splits a signature header string into component pieces.
+     *
+     * @return array{keyId:string, algorithm:string, headers:string, signature:string}
      */
     #[ArrayShape([
         'keyId' => 'string',

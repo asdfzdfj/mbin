@@ -109,9 +109,13 @@ readonly class SignatureValidator
 
         $actorUrl = \is_array($payload['actor']) ? $payload['actor'][0] : $payload['actor'];
 
-        $user = $this->activityPubManager->findActorOrCreate($actorUrl);
+        $user = $this->client->getActorObject($actorUrl);
         if (!empty($user)) {
-            $pkey = openssl_pkey_get_public($this->client->getActorObject($user->apProfileId)['publicKey']['publicKeyPem']);
+            $pkey = openssl_pkey_get_public($user['publicKey']['publicKeyPem']);
+            if (!$pkey) {
+                throw new InvalidApSignatureException("Unable to retrieve public key for actor at {$actorUrl}");
+            }
+
             $this->verifySignature($pkey, $signature, $headers, $request['uri'], $body);
         }
     }

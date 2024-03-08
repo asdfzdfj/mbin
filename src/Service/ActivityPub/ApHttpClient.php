@@ -340,7 +340,7 @@ class ApHttpClient
             $headers['Accept'] = 'application/jrd+json';
             $headers['Content-Type'] = 'application/jrd+json';
         } else {
-            $headers['Accept'] = 'application/activity+json, application/ld+json';
+            $headers['Accept'] = 'application/activity+json';
             $headers['Content-Type'] = 'application/activity+json';
         }
 

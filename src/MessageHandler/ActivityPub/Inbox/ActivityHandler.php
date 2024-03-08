@@ -6,6 +6,7 @@ namespace App\MessageHandler\ActivityPub\Inbox;
 
 use App\Entity\Magazine;
 use App\Entity\User;
+use App\Event\ActivityPub\InboxFilterEvent;
 use App\Exception\InboxForwardingException;
 use App\Message\ActivityPub\Inbox\ActivityMessage;
 use App\Message\ActivityPub\Inbox\AddMessage;
@@ -24,6 +25,7 @@ use App\Service\ActivityPubManager;
 use App\Service\SettingsManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -35,6 +37,7 @@ readonly class ActivityHandler
         private SignatureValidator $signatureValidator,
         private SettingsManager $settingsManager,
         private MessageBusInterface $bus,
+        private EventDispatcherInterface $eventDispatcher,
         private ActivityPubManager $manager,
         private ApHttpClient $apHttpClient,
         private LoggerInterface $logger
@@ -46,6 +49,18 @@ readonly class ActivityHandler
         $payload = @json_decode($message->payload, true);
 
         if ($message->request && $message->headers) {
+            $inboxFilter = $this->eventDispatcher->dispatch(new InboxFilterEvent(
+                $payload, $message->payload, $message->request, $message->headers
+            ));
+            if (!$inboxFilter->isPassed()) {
+                $this->logger->info('inbox filter dropped the message: {reasons}', [
+                    'action' => $inboxFilter->getAction()->name,
+                    'reasons' => $inboxFilter->getReasons(),
+                ]);
+
+                return;
+            }
+
             try {
                 $this->signatureValidator->validate($message->request, $message->headers, $message->payload);
             } catch (InboxForwardingException $exception) {

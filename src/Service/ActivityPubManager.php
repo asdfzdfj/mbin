@@ -17,6 +17,7 @@ use App\Entity\Moderator;
 use App\Entity\Post;
 use App\Entity\PostComment;
 use App\Entity\User;
+use App\Exception\InvalidApGetException;
 use App\Exception\InvalidApPostException;
 use App\Factory\ActivityPub\PersonFactory;
 use App\Factory\MagazineFactory;
@@ -384,7 +385,7 @@ class ActivityPubManager
                         $user->apFollowersCount = $followersObj['totalItems'];
                         $user->updateFollowCounts();
                     }
-                } catch (InvalidApPostException $ignored) {
+                } catch (InvalidApGetException $ignored) {
                 }
             }
 

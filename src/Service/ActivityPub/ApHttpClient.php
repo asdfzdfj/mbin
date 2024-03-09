@@ -6,6 +6,7 @@ namespace App\Service\ActivityPub;
 
 use App\Entity\Magazine;
 use App\Entity\User;
+use App\Exception\InvalidApGetException;
 use App\Exception\InvalidApPostException;
 use App\Exception\InvalidWebfingerException;
 use App\Factory\ActivityPub\GroupFactory;
@@ -15,12 +16,12 @@ use App\Repository\MagazineRepository;
 use App\Repository\SiteRepository;
 use App\Repository\UserRepository;
 use App\Service\ProjectInfoService;
-use JetBrains\PhpStorm\ArrayShape;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\CurlHttpClient;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /*
  * source:
@@ -37,6 +38,11 @@ enum ApRequestType
 class ApHttpClient
 {
     public const TIMEOUT = 8;
+    public const ALLOWED_CONTENT_TYPE = [
+        'application/activity+json',
+        'application/ld+json',
+    ];
+    public const ALLOWED_JSON_LD_PROFILE = 'profile="https://www.w3.org/ns/activitystreams"';
 
     public function __construct(
         private readonly string $kbinDomain,
@@ -48,8 +54,89 @@ class ApHttpClient
         private readonly UserRepository $userRepository,
         private readonly MagazineRepository $magazineRepository,
         private readonly SiteRepository $siteRepository,
-        private readonly ProjectInfoService $projectInfo
+        private readonly ProjectInfoService $projectInfo,
+        private readonly HttpClientInterface $httpClient,
     ) {
+    }
+
+    /**
+     * get any AP object.
+     *
+     * note that this function _does not_ automatically cache its results, do that on your own
+     *
+     * @param string             $url     url to fetch AP object from
+     * @param User|Magazine|null $signer  identity to sign request as, leave null to use instance actor
+     * @param bool               $decoded decode json response as array if true
+     */
+    public function getApObject(string $url, User|Magazine $signer = null, bool $decoded = true): array|string
+    {
+        $client = $this->httpClient->withOptions([
+            'timeout' => self::TIMEOUT,
+            'max_duration' => self::TIMEOUT,
+            'headers' => $signer
+                ? $this->getHeaders($url, $signer, 'get')
+                : $this->getInstanceHeaders($url),
+        ]);
+
+        $resp = $client->request('GET', $url);
+        $status = $resp->getStatusCode();
+
+        // accept 410 in case of tombstones
+        // actually, maybe it's not needed?
+        if (!self::isStatusAcceptable($status, [410])) {
+            throw new InvalidApGetException("Invalid status code while getting: {$url} : $status, ".mb_substr($resp->getContent(false), 0, 1000));
+        }
+
+        // only verify when not 410 since something may send 410 { "error": "Gone" }
+        // as an answer, rather than tombstones
+        if (self::isStatusAcceptable($status)) {
+            $headers = $resp->getHeaders(false);
+            $contentType = $headers['content-type'][0] ?? '';
+
+            $this->validateApContentType($contentType);
+        }
+
+        return $decoded ? $resp->toArray(false) : $resp->getContent(false);
+    }
+
+    public static function parseContentType(string $contentType): array
+    {
+        $values = explode(';', $contentType);
+        $mediaType = trim(array_shift($values));
+        $parameters = array_filter(array_map(
+            // try to normalize all parameter values into quoted version
+            fn ($param) => preg_replace('/^([^=]+)=([^"].+[^"])$/', '\1="\2"', trim($param)),
+            $values
+        ));
+
+        return [$mediaType, $parameters];
+    }
+
+    private function validateApContentType(string $contentType)
+    {
+        if (!$contentType) {
+            throw new InvalidApGetException('response content-type is empty');
+        }
+
+        [$mediaType, $parameters] = self::parseContentType($contentType);
+
+        if (!\in_array($mediaType, self::ALLOWED_CONTENT_TYPE)) {
+            $this->logger->error(
+                'response content-type is not acceptable: expecting {expected}, got {actual}',
+                ['expected' => self::ALLOWED_CONTENT_TYPE, 'actual' => $contentType]
+            );
+            throw new InvalidApGetException('response content type is not acceptable: '.$contentType);
+        } elseif ('application/ld+json' === $mediaType && !\in_array(self::ALLOWED_JSON_LD_PROFILE, $parameters)) {
+            $this->logger->info(
+                'response content-type is application/ld+json but no valid profile specified, continuing anyway',
+                ['content-type' => $contentType]
+            );
+        }
+    }
+
+    protected static function isStatusAcceptable(int $status, array $extra = []): bool
+    {
+        return ($status >= 200 && $status < 300) || \in_array($status, $extra);
     }
 
     public function getActivityObject(string $url, bool $decoded = true): array|string|null
@@ -57,26 +144,16 @@ class ApHttpClient
         $resp = $this->cache->get('ap_'.hash('sha256', $url), function (ItemInterface $item) use ($url) {
             $this->logger->debug("ApHttpClient:getActivityObject:url: $url");
 
-            $client = new CurlHttpClient();
-            $r = $client->request('GET', $url, [
-                'max_duration' => self::TIMEOUT,
-                'timeout' => self::TIMEOUT,
-                'headers' => $this->getInstanceHeaders($url),
-            ]);
-
-            $statusCode = $r->getStatusCode();
-            // Accepted status code are 2xx or 410 (used Tombstone types)
-            if (!str_starts_with((string) $statusCode, '2') && 410 !== $statusCode) {
-                throw new InvalidApPostException("Invalid status code while getting: $url : $statusCode, ".substr($r->getContent(false), 0, 1000));
-            }
+            $resp = $this->getApObject($url, null, false);
 
             $item->expiresAt(new \DateTime('+1 hour'));
 
-            // Read also non-OK responses (like 410) by passing 'false'
-            $content = $r->getContent(false);
-            $this->logger->debug('ApHttpClient:getActivityObject:url: {url} - content: {content}', ['url' => $url, 'content' => $content]);
+            $this->logger->debug(
+                'ApHttpClient:getActivityObject:url: {url} - content: {content}',
+                ['url' => $url, 'content' => $resp]
+            );
 
-            return $content;
+            return $resp;
         });
 
         if (!$resp) {
@@ -207,7 +284,15 @@ class ApHttpClient
             }
         );
 
-        return $resp ? json_decode($resp, true) : null;
+        if (!$resp) {
+            return null;
+        }
+
+        return match (true) {
+            \is_array($resp) => $resp,
+            \is_string($resp) => json_decode($resp, true),
+            default => null,
+        };
     }
 
     /**
@@ -216,36 +301,16 @@ class ApHttpClient
     public function getCollectionObject(string $apAddress)
     {
         $resp = $this->cache->get(
-            'ap_collection'.hash('sha256', $apAddress),
+            'ap_collection_'.hash('sha256', $apAddress),
             function (ItemInterface $item) use ($apAddress) {
                 $this->logger->debug("ApHttpClient:getCollectionObject:url: $apAddress");
-                $response = null;
-                try {
-                    // Set-up request
-                    $client = new CurlHttpClient();
-                    $response = $client->request('GET', $apAddress, [
-                        'max_duration' => self::TIMEOUT,
-                        'timeout' => self::TIMEOUT,
-                        'headers' => $this->getInstanceHeaders($apAddress, null, 'get', ApRequestType::ActivityPub),
-                    ]);
 
-                    $statusCode = $response->getStatusCode();
-                    // Accepted status code are 2xx or 410 (used Tombstone types)
-                    if (!str_starts_with((string) $statusCode, '2') && 410 !== $statusCode) {
-                        throw new InvalidApPostException("Invalid status code while getting: $apAddress : $statusCode, ".substr($response->getContent(false), 0, 1000));
-                    }
-                } catch (\Exception $e) {
-                    $msg = "AP Get fail: $apAddress, ex: ".\get_class($e).": {$e->getMessage()}";
-                    if (null !== $response) {
-                        $msg .= ', '.$response->getContent(false);
-                    }
-                    throw new InvalidApPostException($msg);
-                }
+                $resp = $this->getApObject($apAddress, null, false);
 
                 $item->expiresAt(new \DateTime('+24 hour'));
 
                 // When everything goes OK, return the data
-                return $response->getContent();
+                return $resp;
             }
         );
 
@@ -278,7 +343,7 @@ class ApHttpClient
             'max_duration' => self::TIMEOUT,
             'timeout' => self::TIMEOUT,
             'body' => json_encode($body),
-            'headers' => $this->getHeaders($url, $actor, $body),
+            'headers' => $this->getHeaders($url, $actor, 'post', $body),
         ]);
 
         if (!str_starts_with((string) $response->getStatusCode(), '2')) {
@@ -292,18 +357,31 @@ class ApHttpClient
         $this->cache->save($item);
     }
 
-    private static function headersToCurlArray($headers): array
+    private function getContentTypeHeaders(ApRequestType $requestType): array
     {
-        return array_map(function ($k, $v) {
-            return "$k: $v";
-        }, array_keys($headers), $headers);
+        return match ($requestType) {
+            ApRequestType::ActivityPub => [
+                'Accept' => 'application/activity+json',
+                'Content-Type' => 'application/activity+json',
+            ],
+            ApRequestType::WebFinger => [
+                'Accept' => 'application/jrd+json',
+                'Content-Type' => 'application/jrd+json',
+            ],
+        };
     }
 
-    private function getHeaders(string $url, User|Magazine $actor, array $body = null): array
+    public function getUserAgentString(): string
     {
-        $headers = self::headersToSign($url, $body ? self::digest($body) : null);
+        return $this->projectInfo->getUserAgent().'/'.$this->projectInfo->getVersion().' (+https://'.$this->kbinDomain.'/agent)';
+    }
+
+    private function getHeaders(string $url, User|Magazine $actor, string $method = 'post', array $body = null): array
+    {
+        $headers = self::headersToSign($url, $body ? self::digest($body) : null, $method);
         $stringToSign = self::headersToSigningString($headers);
         $signedHeaders = implode(' ', array_map('strtolower', array_keys($headers)));
+
         $key = openssl_pkey_get_private($actor->privateKey);
         openssl_sign($stringToSign, $signature, $key, OPENSSL_ALGO_SHA256);
         $signature = base64_encode($signature);
@@ -315,51 +393,50 @@ class ApHttpClient
         $signatureHeader = 'keyId="'.$keyId.'",headers="'.$signedHeaders.'",algorithm="rsa-sha256",signature="'.$signature.'"';
         unset($headers['(request-target)']);
         $headers['Signature'] = $signatureHeader;
-        $headers['User-Agent'] = $this->projectInfo->getUserAgent().'/'.$this->projectInfo->getVersion().' (+https://'.$this->kbinDomain.'/agent)';
-        $headers['Accept'] = 'application/activity+json, application/ld+json';
-        $headers['Content-Type'] = 'application/activity+json';
+
+        $headers['User-Agent'] = $this->getUserAgentString();
+
+        $headers = array_replace($headers, $this->getContentTypeHeaders(ApRequestType::ActivityPub));
 
         return $headers;
     }
 
-    private function getInstanceHeaders(string $url, array $body = null, string $method = 'get', ApRequestType $requestType = ApRequestType::ActivityPub): array
-    {
-        $keyId = 'https://'.$this->kbinDomain.'/i/actor#main-key';
-        $privateKey = $this->getInstancePrivateKey();
+    private function getInstanceHeaders(
+        string $url,
+        array $body = null,
+        string $method = 'get',
+        ApRequestType $requestType = ApRequestType::ActivityPub
+    ): array {
         $headers = self::headersToSign($url, $body ? self::digest($body) : null, $method);
         $stringToSign = self::headersToSigningString($headers);
         $signedHeaders = implode(' ', array_map('strtolower', array_keys($headers)));
+
+        $privateKey = $this->getInstancePrivateKey();
         $key = openssl_pkey_get_private($privateKey);
         openssl_sign($stringToSign, $signature, $key, OPENSSL_ALGO_SHA256);
         $signature = base64_encode($signature);
+
+        $keyId = 'https://'.$this->kbinDomain.'/i/actor#main-key';
         $signatureHeader = 'keyId="'.$keyId.'",headers="'.$signedHeaders.'",algorithm="rsa-sha256",signature="'.$signature.'"';
         unset($headers['(request-target)']);
         $headers['Signature'] = $signatureHeader;
-        $headers['User-Agent'] = $this->projectInfo->getUserAgent().'/'.$this->projectInfo->getVersion().' (+https://'.$this->kbinDomain.'/agent)';
-        if (ApRequestType::WebFinger === $requestType) {
-            $headers['Accept'] = 'application/jrd+json';
-            $headers['Content-Type'] = 'application/jrd+json';
-        } else {
-            $headers['Accept'] = 'application/activity+json';
-            $headers['Content-Type'] = 'application/activity+json';
-        }
+
+        $headers['User-Agent'] = $this->getUserAgentString();
+
+        $headers = array_replace($headers, $this->getContentTypeHeaders($requestType));
 
         return $headers;
     }
 
-    #[ArrayShape([
-        '(request-target)' => 'string',
-        'Date' => 'string',
-        'Host' => 'mixed',
-        'Accept' => 'string',
-        'Digest' => 'string',
-    ])]
+    /**
+     * @return array{'(request-target)':string, Date:string, Host:mixed, Digest?:string} http signature base headers
+     */
     protected static function headersToSign(string $url, string $digest = null, string $method = 'post'): array
     {
         $date = new \DateTime('UTC');
 
         if (!\in_array($method, ['post', 'get'])) {
-            throw new InvalidApPostException('Invalid method used to sign headers in ApHttpClient');
+            throw new \InvalidArgumentException('Invalid method used to sign headers in ApHttpClient');
         }
         $headers = [
             '(request-target)' => $method.' '.parse_url($url, PHP_URL_PATH),
@@ -383,9 +460,11 @@ class ApHttpClient
     {
         return implode(
             "\n",
-            array_map(function ($k, $v) {
-                return strtolower($k).': '.$v;
-            }, array_keys($headers), $headers)
+            array_map(
+                fn ($k, $v) => strtolower($k).': '.$v,
+                array_keys($headers),
+                $headers
+            )
         );
     }
 

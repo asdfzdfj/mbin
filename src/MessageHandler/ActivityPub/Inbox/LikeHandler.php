@@ -49,7 +49,7 @@ class LikeHandler
                 $object = $this->apHttpClient->getActivityObject($message->payload['object']);
 
                 if (!empty($object)) {
-                    $this->bus->dispatch(new ChainActivityMessage([$object], null, null, $message->payload));
+                    $this->bus->dispatch(new ChainActivityMessage([$object], like: $message->payload));
                 }
 
                 return;

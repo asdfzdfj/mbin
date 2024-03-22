@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MessageHandler\ActivityPub\Inbox;
 
+use App\Entity\Entry;
 use App\Entity\EntryComment;
 use App\Entity\Post;
 use App\Entity\PostComment;
@@ -11,7 +12,6 @@ use App\Message\ActivityPub\Inbox\AnnounceMessage;
 use App\Message\ActivityPub\Inbox\ChainActivityMessage;
 use App\Message\ActivityPub\Inbox\DislikeMessage;
 use App\Message\ActivityPub\Inbox\LikeMessage;
-use App\Message\ActivityPub\Outbox\AnnounceMessage as OutboxAnnounceMessage;
 use App\Repository\ApActivityRepository;
 use App\Service\ActivityPub\ApHttpClient;
 use App\Service\ActivityPub\Note;
@@ -35,121 +35,114 @@ class ChainActivityHandler
 
     public function __invoke(ChainActivityMessage $message): void
     {
-        if ($message->parent) {
-            $this->unloadStack($message->chain, $message->parent, $message->announce, $message->like, $message->dislike);
+        // build the full chain
+        $chain = $message->chain;
+
+        // old handler compat: if parent is set then skip chain building
+        if (!$message->parent) {
+            $chain = $this->buildChain($message->chain);
+
+            $last = end($chain);
+            $message->parent = !empty($last['id'])
+                ? $this->repository->findByObjectId($last['id'])
+                : null;
+        }
+
+        if (!$chain) {
+            $this->logger->debug('activity chain is empty, not processing');
 
             return;
         }
 
-        $object = end($message->chain);
-        if (!empty($object)) {
-            // Handle parent objects
-            if (isset($object['inReplyTo']) && $object['inReplyTo']) {
-                if ($existed = $this->repository->findByObjectId($object['inReplyTo'])) {
-                    $this->bus->dispatch(
-                        new ChainActivityMessage($message->chain, $existed, $message->announce, $message->like, $message->dislike)
-                    );
+        $this->logger->debug('complete chain', ['chain' => array_map(fn ($o) => $o['id'] ?? null, $chain)]);
 
-                    return;
-                }
-
-                $message->chain[] = $this->client->getActivityObject($object['inReplyTo']);
-                $this->bus->dispatch(new ChainActivityMessage($message->chain, null, $message->announce, $message->like, $message->dislike));
-
-                return;
-            }
-
-            $entity = match ($this->getType($object)) {
-                'Note' => $this->note->create($object),
-                'Page' => $this->page->create($object),
-                default => null
-            };
+        // make entities from chain
+        while ($object = array_pop($chain)) {
+            $entity = $this->processObject($object);
 
             if (!$entity) {
-                if ($message->announce && $message->announce['object'] === $object['object']) {
-                    $this->unloadStack($message->chain, $message->parent, $message->announce, $message->like);
-                }
-
-                if ($message->like && $message->like['object'] === $object['object']) {
-                    $this->unloadStack($message->chain, $message->parent, $message->announce, $message->like);
-                }
+                $this->logger->debug('unable to process object found in chain, dropping chain', ['object' => $object]);
 
                 return;
             }
-
-            array_pop($message->chain);
         }
 
-        if (!empty($entity)) {
-            $this->bus->dispatch(
-                new ChainActivityMessage($message->chain, [
-                    'id' => $entity->getId(),
-                    'type' => \get_class($entity),
-                ], $message->announce, $message->like, $message->dislike)
-            );
+        // redispatch root message of the chain after all parents have been processed
+        // ($chain should now be empty)
+        if (!$chain) {
+            $this->redispatchRootMessage($message);
         }
     }
 
-    private function unloadStack(array $chain, array $parent, array $announce = null, array $like = null, array $dislike = null): void
+    private function buildChain(array $chain): array
     {
         $object = end($chain);
-
-        if (!empty($object)) {
-            if (\is_string($object)) {
-                if (false !== filter_var($object, FILTER_VALIDATE_URL)) {
-                    $object = $this->client->getActivityObject($object);
-                } else {
-                    // if the object is a string, but not an url it is not valid and therefore nothing should be done
-                    return;
-                }
-            }
-            $createdObject = match ($this->getType($object)) {
-                'Question', 'Note' => $this->note->create($object),
-                'Page' => $this->page->create($object),
-                default => null
-            };
-
-            if ($createdObject and ($createdObject instanceof EntryComment or $createdObject instanceof Post or $createdObject instanceof PostComment)) {
-                if (null !== $createdObject->apId and null === $createdObject->magazine->apId) {
-                    // local magazine, but remote post
-                    $this->bus->dispatch(new OutboxAnnounceMessage(null, $createdObject->magazine->getId(), $createdObject->getId(), \get_class($createdObject)));
-                }
-            }
-
-            array_pop($chain);
-
-            if (\count(array_filter($chain))) {
-                $this->bus->dispatch(new ChainActivityMessage($chain, $parent, $announce, $like, $dislike));
-
-                return;
-            }
+        if (!$object) {
+            return [];
         }
+
+        $inReplyTo = $object['inReplyTo'] ?? null;
+        $existed = $inReplyTo ? $this->repository->findByObjectId($inReplyTo) : null;
+
+        while ($inReplyTo && !$existed) {
+            $this->logger->debug(
+                'fetching unknown parent {parent} for object {object}',
+                ['parent' => $inReplyTo, 'object' => $object['id']]
+            );
+
+            $object = $this->client->getActivityObject($inReplyTo);
+            $chain[] = $object;
+
+            $inReplyTo = $object['inReplyTo'] ?? null;
+            $existed = $inReplyTo ? $this->repository->findByObjectId($inReplyTo) : null;
+        }
+
+        return $chain;
+    }
+
+    private function isProcessable(mixed $object): bool
+    {
+        return !empty($object)
+            && \is_array($object)
+            && !array_is_list($object)
+            && $this->getType($object);
+    }
+
+    private function processObject(array $object): null|Entry|EntryComment|Post|PostComment
+    {
+        if (!$this->isProcessable($object)) {
+            return null;
+        }
+
+        $type = $this->getType($object);
+
+        $entity = match ($type) {
+            'Note', 'Question' => $this->note->create($object),
+            'Page', 'Article' => $this->page->create($object),
+            default => null,
+        };
+
+        return $entity;
+    }
+
+    private function redispatchRootMessage(ChainActivityMessage $message)
+    {
         // only one of $announce, $like and $dislike should ever be set
-        if ($announce) {
-            $this->bus->dispatch(new AnnounceMessage($announce));
-
-            return;
-        }
-
-        if ($like) {
-            $this->bus->dispatch(new LikeMessage($like));
-
-            return;
-        }
-
-        if ($dislike) {
-            $this->bus->dispatch(new DislikeMessage($dislike));
-
-            return;
+        if ($message->announce) {
+            $this->bus->dispatch(new AnnounceMessage($message->announce));
+        } elseif ($message->like) {
+            $this->bus->dispatch(new LikeMessage($message->like));
+        } elseif ($message->dislike) {
+            $this->bus->dispatch(new DislikeMessage($message->dislike));
         }
     }
 
     private function getType(array $object): string
     {
         if (isset($object['object']) && \is_array($object['object'])) {
-            return $object['object']['type'];
+            return $object['object']['type'] ?? null;
         }
 
-        return $object['type'];
+        return $object['type'] ?? null;
     }
 }

@@ -27,6 +27,9 @@ class ApActivityRepository extends ServiceEntityRepository
         parent::__construct($registry, ApActivity::class);
     }
 
+    /**
+     * @return ?array{id: int, type: string} entity id along with entity object class
+     */
     public function findByObjectId(string $apId): ?array
     {
         $parsed = parse_url($apId);

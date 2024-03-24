@@ -35,6 +35,8 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use League\HTMLToMarkdown\HtmlConverter;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Lock\Key;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -59,6 +61,7 @@ class ActivityPubManager
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly MessageBusInterface $bus,
         private readonly LoggerInterface $logger,
+        private readonly LockFactory $lockFactory,
     ) {
     }
 
@@ -165,7 +168,7 @@ class ActivityPubManager
                     $user = $this->createUser($actorUrl);
                 } else {
                     if (!$user->apFetchedAt || $user->apFetchedAt->modify('+1 hour') < (new \DateTime())) {
-                        $this->bus->dispatch(new UpdateActorMessage($user->apProfileId));
+                        $this->dispatchUpdateActor($user->apProfileId);
                     }
                 }
 
@@ -181,7 +184,7 @@ class ActivityPubManager
                     $magazine = $this->createMagazine($actorUrl);
                 } else {
                     if (!$magazine->apFetchedAt || $magazine->apFetchedAt->modify('+1 hour') < (new \DateTime())) {
-                        $this->bus->dispatch(new UpdateActorMessage($magazine->apProfileId));
+                        $this->dispatchUpdateActor($magazine->apProfileId);
                     }
                 }
 
@@ -203,6 +206,20 @@ class ActivityPubManager
         }
 
         return null;
+    }
+
+    public function dispatchUpdateActor(string $actorUrl)
+    {
+        $key = new Key('update_actor_'.hash('sha256', $actorUrl));
+        $lock = $this->lockFactory->createLockFromKey($key, 60, false);
+        if ($lock->acquire()) {
+            $this->bus->dispatch((new UpdateActorMessage($actorUrl))->withKey($key));
+        } else {
+            $this->logger->debug(
+                'not dispatching updating actor for {actor}: another ongoing actor update is in progress',
+                ['actor' => $actorUrl]
+            );
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Repository\MagazineRepository;
 use App\Repository\UserRepository;
 use App\Service\ActivityPubManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -27,9 +28,15 @@ class UpdateActorHandler
     public function __invoke(UpdateActorMessage $message): void
     {
         $actorUrl = $message->actorUrl;
-        $lock = $this->lockFactory->createLock('update_actor_'.hash('sha256', $actorUrl), 60);
+        if ($key = $message->retrieveKey()) {
+            $lock = $this->lockFactory->createLockFromKey($key, 60);
+        } else {
+            $key = new Key('update_actor_'.hash('sha256', $actorUrl));
+            $lock = $this->lockFactory->createLockFromKey($key, 60);
+            $lock->acquire();
+        }
 
-        if (!$lock->acquire()) {
+        if (!$lock->isAcquired()) {
             $this->logger->debug(
                 'not updating actor at {url}: ongoing actor update is already in progress',
                 ['url' => $actorUrl]

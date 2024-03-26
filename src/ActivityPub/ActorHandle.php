@@ -6,7 +6,7 @@ namespace App\ActivityPub;
 
 class ActorHandle
 {
-    public const HANDLE_PATTERN = '/^(?P<prefix>[@!])?(?P<name>[\w\-\.]+)@(?P<host>[\w\.\-]+)(?P<port>:[\d]+)?$/';
+    public const HANDLE_PATTERN = '/^(?P<prefix>[@!])?(?P<name>[\w\-\.]+)(?:@(?P<host>[\w\.\-]+)(?P<port>:[\d]+)?)?$/';
 
     public function __construct(
         public ?string $prefix = null,
@@ -27,28 +27,27 @@ class ActorHandle
             $new = new static(
                 $match['prefix'] ?? null,
                 $match['name'],
-                $match['host']
+                $match['host'] ?? null
             );
             $new->setPort($match['port'] ?? null);
 
-            return $new;
+            return $new->isValid() ? $new : null;
         }
 
         return null;
     }
 
-    public static function isHandle(string $handle)
-    {
-        if (preg_match(static::HANDLE_PATTERN, $handle, $matches)) {
-            return !empty($matches['name']) && !empty($matches['host']);
-        }
-
-        return false;
-    }
-
     public function isValid(): bool
     {
-        return static::isHandle((string) $this);
+        if (null !== $this->port) {
+            return !empty($this->name) && !empty($this->host);
+        } elseif ($this->host) {
+            return !empty($this->name);
+        } elseif (!$this->host) {
+            return !empty($this->name) && !empty($this->prefix);
+        } else {
+            return false;
+        }
     }
 
     /** @return string port as string in the format ':9000' or empty string if it's null */
@@ -60,11 +59,9 @@ class ActorHandle
     /** @param int|string|null $port port as either plain int or string formatted like ':9000' */
     public function setPort(int|string|null $port)
     {
-        if (\is_string($port)) {
-            $this->port = \intval(ltrim($port, ':'));
-        } else {
-            $this->port = $port;
-        }
+        $this->port = \is_string($port)
+            ? \intval(ltrim($port, ':'))
+            : $port;
 
         return $this;
     }
@@ -88,7 +85,10 @@ class ActorHandle
 
     public function formatWithPrefix(?string $prefix): string
     {
-        return "{$prefix}{$this->name}@{$this->getDomain()}";
+        $user = "{$prefix}{$this->name}";
+        $remote = $this->host ? "@{$this->getDomain()}" : '';
+
+        return $user.$remote;
     }
 
     /** @return string handle in the form `name@domain` */

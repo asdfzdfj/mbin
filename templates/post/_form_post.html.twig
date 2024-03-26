@@ -24,9 +24,10 @@
 <div class="row">
     {{ component('editor_toolbar', {id: 'post_body'}) }}
     {{ form_row(form.body, {label: false, attr: {
-        'data-controller': 'input-length rich-textarea autogrow',
-        'data-action' : 'input-length#updateDisplay',
-        'data-input-length-max-value': constant('App\\DTO\\PostDto::MAX_BODY_LENGTH')
+        'data-controller': 'input-length rich-textarea autogrow emoji-input',
+        'data-action' : 'input-length#updateDisplay emoji-input#interact keydown->emoji-input#selectionInteract',
+        'data-input-length-max-value': constant('App\\DTO\\PostDto::MAX_BODY_LENGTH'),
+        'data-emoji-input-wide-suggestion-value': true,
         }}) }}
 </div>
 <div class="row params">

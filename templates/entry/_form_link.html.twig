@@ -27,10 +27,10 @@
     {{ component('editor_toolbar', {id: 'entry_link_body'}) }}
     {{ form_row(form.body, {label: false, attr: {
         placeholder: 'body',
-        'data-controller': 'input-length rich-textarea autogrow',
+        'data-controller': 'input-length rich-textarea autogrow emoji-input',
         'data-entry-link-create-target': 'description',
-        'data-action': 'input-length#updateDisplay',
-        'data-input-length-max-value': constant('App\\Entity\\Entry::MAX_BODY_LENGTH')
+        'data-action': 'input-length#updateDisplay emoji-input#interact keydown->emoji-input#selectionInteract',
+        'data-input-length-max-value': constant('App\\Entity\\Entry::MAX_BODY_LENGTH'),
         }}) }}
     {{ form_row(form.magazine, {label: false}) }}
     {{ form_row(form.tags, {label: 'tags'}) }}

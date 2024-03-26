@@ -18,8 +18,8 @@
     {{ form_row(form.body, {
         label: false, attr: {
             placeholder: 'body',
-            'data-controller': 'rich-textarea input-length autogrow',
-            'data-action' : 'input-length#updateDisplay',
+            'data-controller': 'rich-textarea input-length autogrow emoji-input',
+            'data-action' : 'input-length#updateDisplay emoji-input#interact keydown->emoji-input#selectionInteract',
             'data-input-length-max-value' : constant('App\\Entity\\Entry::MAX_BODY_LENGTH')
             }}) }}
     {{ form_row(form.magazine, {label: false}) }}

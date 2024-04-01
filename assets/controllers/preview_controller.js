@@ -13,22 +13,20 @@ export default class extends Controller {
     static throttles = ['show'];
 
     connect() {
-        useThrottle(this, {wait: 1000});
+        useThrottle(this, {wait: 500});
 
         // workaround: give itself a container if it couldn't find one
         // I am not happy with this
         if (!this.hasContainerTarget && this.element.matches('span.preview')) {
-            let container = this.createContainerTarget('preview-target');
+            let container = this.createContainerTarget();
             this.element.insertAdjacentElement('beforeend', container);
             console.warn('unable to find container target, creating one for itself at', this.element.lastChild);
         }
     }
 
-    createContainerTarget(extraClasses) {
-        let classes = [].concat(extraClasses ?? []);
-
+    createContainerTarget() {
         let div = document.createElement('div');
-        div.classList.add(...classes, 'hidden');
+        div.classList.add('preview-target', 'hidden');
         div.dataset.previewTarget = 'container';
 
         return div;
@@ -48,25 +46,24 @@ export default class extends Controller {
 
         if (this.containerTarget.hasChildNodes()) {
             this.containerTarget.classList.toggle('hidden');
+            this.containerTarget.replaceChildren();
+
             return;
         }
 
         try {
             this.loadingValue = true;
 
-            let response = await fetch(router().generate('ajax_fetch_embed', {url: event.params.url}), {method: 'GET'});
+            let previewHtml = await this.fetchEmbed(event.params.url);
 
-            response = await ok(response);
-            response = await response.json();
-
-            this.containerTarget.innerHTML = response.html;
+            this.containerTarget.innerHTML = previewHtml;
             this.containerTarget.classList.remove('hidden');
             if (event.params.ratio) {
                 this.containerTarget
                     .querySelector('.preview')
                     .classList.add('ratio');
             }
-            this.loadScripts(response.html);
+            this.loadScripts(previewHtml);
         } catch (e) {
             console.error('preview failed: ', e);
             let failedHtml =
@@ -83,6 +80,19 @@ export default class extends Controller {
         } finally {
             this.loadingValue = false;
         }
+    }
+
+    async fetchEmbed(url) {
+        if (!this.previewHtml) {
+            let response = await fetch(router().generate('ajax_fetch_embed', {url: url}), {method: 'GET'});
+
+            response = await ok(response);
+            response = await response.json();
+
+            this.previewHtml = response.html;
+        }
+
+        return this.previewHtml;
     }
 
     loadScripts(response) {

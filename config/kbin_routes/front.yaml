@@ -1,7 +1,7 @@
 front:
   controller: App\Controller\Entry\EntryFrontController::front
   defaults: { subscription: home, sortBy: hot, time: '∞', type: all, federation: all, content: threads }
-  path: /{subscription}/{sortBy}/{time}/{type}/{federation}/{content}
+  path: /{subscription}/{content}/{sortBy}/{time}/{type}/{federation}
   methods: [GET]
   requirements:
     subscription: "%default_subscription_options%"
@@ -14,7 +14,18 @@ front:
 front_redirect:
   controller: App\Controller\Entry\EntryFrontController::front_redirect
   defaults: { sortBy: hot, time: '∞', type: all, federation: all, content: threads }
-  path: /{sortBy}/{time}/{type}/{federation}/{content}
+  path: /{sortBy}/{time}/{type}/{federation}
+  methods: [GET]
+  requirements:
+    sortBy: "%default_sort_options%"
+    time: "%default_time_options%"
+    type: "%default_type_options%"
+    federation: "%default_federation_options%"
+
+front_magazine:
+  controller: App\Controller\Entry\EntryFrontController::magazine
+  defaults: { sortBy: hot, time: '∞', type: all, federation: all, content: threads }
+  path: /m/{name}/{content}/{sortBy}/{time}/{type}/{federation}
   methods: [GET]
   requirements:
     sortBy: "%default_sort_options%"
@@ -23,10 +34,22 @@ front_redirect:
     federation: "%default_federation_options%"
     content: "%default_content_options%"
 
-front_magazine:
-  controller: App\Controller\Entry\EntryFrontController::magazine
-  defaults: { sortBy: hot, time: '∞', type: all, federation: all, content: threads }
-  path: /m/{name}/{sortBy}/{time}/{type}/{federation}/{content}
+front_sub:
+  controller: App\Controller\Entry\EntryFrontController::front_redirect
+  defaults: { subscription: home, sortBy: hot, time: '∞', type: all, federation: all, content: threads }
+  path: /{subscription}/{sortBy}/{time}/{type}/{federation}
+  methods: [GET]
+  requirements:
+    subscription: "%default_subscription_options%"
+    sortBy: "%default_sort_options%"
+    time: "%default_time_options%"
+    type: "%default_type_options%"
+    federation: "%default_federation_options%"
+
+front_content:
+  controller: App\Controller\Entry\EntryFrontController::front_redirect
+  defaults: { subscription: home, sortBy: hot, time: '∞', type: all, federation: all, content: threads }
+  path: /{content}/{sortBy}/{time}/{type}/{federation}
   methods: [GET]
   requirements:
     sortBy: "%default_sort_options%"
@@ -34,6 +57,17 @@ front_magazine:
     type: "%default_type_options%"
     federation: "%default_federation_options%"
     content: "%default_content_options%"
+
+front_magazine_redirect:
+  controller: App\Controller\Entry\EntryFrontController::magazine
+  defaults: { sortBy: hot, time: '∞', type: all, federation: all, content: threads }
+  path: /m/{name}/{sortBy}/{time}/{type}/{federation}
+  methods: [GET]
+  requirements:
+    sortBy: "%default_sort_options%"
+    time: "%default_time_options%"
+    type: "%default_type_options%"
+    federation: "%default_federation_options%"
 
 # Microblog compatibility stuff, redirects from the old routes' URLs
 

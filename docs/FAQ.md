@@ -2,6 +2,17 @@
 
 See below our Frequently Asked Questions (FAQ). The questions (and corresponding answers) below are in random order.
 
+## What is Mbin?
+
+Mbin is an _open-source federated link aggregation, content rating and discussion_ software that is built on top of _ActivityPub_.
+
+## What is ActivityPub (AP)?
+
+ActivityPub is a open standard protocol that empowers the creation of decentralized social networks, allowing different servers to interact and share content while giving users control over their data.  
+It fosters a more user-centric and distributed approach to social networking, promoting interoperability across platforms and safeguarding user privacy and choice.
+
+This protocol is vital for building a more open, inclusive, and user-empowered digital social landscape.
+
 ## Where can I find more info about AP?
 
 There exists an official [ActivityPub specification](https://www.w3.org/TR/activitypub/), as well as [several AP extensions](https://codeberg.org/fediverse/fep/) on this specification.
@@ -91,21 +102,21 @@ sudo rabbitmqctl set_permissions -p / <user> ".*" ".*" ".*"
 
 Now you can open the RabbitMQ management page: (insecure connection!) `http://<server-ip>:15672` with the username and the password provided earlier. [More info can be found here](https://www.rabbitmq.com/management.html#getting-started). See screenshot below of a typical small instance of Mbin running RabbitMQ management interface ("Queued message" of 4k or even 10k is normal after recent Mbin changes, see down below for more info):
 
-![Typical load on very small instances](../images/rabbit_small_load_typical.png)
+![Typical load on very small instances](images/rabbit_small_load_typical.png)
 
 ## Messenger Queue is building up even though my messengers are idling
 
 We recently changed the messenger config to retry failed messages 3 times, instead of sending them straight to the `failed` queue.
 RabbitMQ will now have new queues being added for the different delays (so a message does not get retried 5 times per second):
 
-![Queue overview](../images/rabbit_queue_tab_cut.png)
+![Queue overview](images/rabbit_queue_tab_cut.png)
 
 The global overview from RabbitMQ shows the ready messages for all queues combined. Messages in the retry queues count as ready messages the whole time they are in there,
 so for a correct ready count you have to go to the queue specific overview.
 
 | Overview                                                  | Queue Tab                                           | "Message" Queue Overview                                            |
 | --------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------- |
-| ![Queued messages](../images/rabbit_queue_overview.png) | ![Queue overview](../images/rabbit_queue_tab.png) | ![Message Queue Overview](../images/rabbit_messages_overview.png) |
+| ![Queued messages](images/rabbit_queue_overview.png) | ![Queue overview](images/rabbit_queue_tab.png) | ![Message Queue Overview](images/rabbit_messages_overview.png) |
 
 ## RabbitMQ Prometheus exporter
 
@@ -195,7 +206,7 @@ If you're seeing this error in logs:
 > getInstancePrivateKey(): Return value must be of type string, null returned
 
 At time of writing, `getInstancePrivateKey()` [calls out to the Redis cache](https://github.com/MbinOrg/mbin/blob/main/src/Service/ActivityPub/ApHttpClient.php#L348)
-first, so any updates to the keys requires a `DEL instance_private_key instance_public_key` (or `FLUSHDB` to be certain, as documented here: [bare metal](04-running-mbin/upgrades.md#clear-cache) and [docker](04-running-mbin/upgrades.md#clear-cache-1))
+first, so any updates to the keys requires a `DEL instance_private_key instance_public_key` (or `FLUSHDB` to be certain, as documented here: [bare metal](02-admin/04-running-mbin/upgrades.md#clear-cache) and [docker](02-admin/04-running-mbin/upgrades.md#clear-cache-1))
 
 ## RabbitMQ shows a really high publishing rate
 
@@ -221,7 +232,7 @@ If you believe you have a queued message that is infinitely looping / stuck, you
 > [!WARNING]
 > This will permanently discard the payload
 
-![Rabbit discard payload](../images/rabbit_reject_requeue_false.png)
+![Rabbit discard payload](images/rabbit_reject_requeue_false.png)
 
 ## Performance hints
 

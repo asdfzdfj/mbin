@@ -76,13 +76,13 @@ gzip_types
         font/opentype;
 ```
 
-## Mbin Nginx Server Block
+## Mbin NGINX Server Block for serving the site (bare metal)
+
+NGINX Server blocks example for serving the site from source directory:
 
 ```bash
 sudo nano /etc/nginx/sites-available/mbin.conf
 ```
-
-With the content:
 
 ```nginx
 # Redirect HTTP to HTTPS
@@ -191,6 +191,69 @@ server {
     # this prevents access to other php files you don't want to be accessible.
     location ~ \.php$ {
         return 404;
+    }
+}
+```
+
+## Mbin NGINX Server Block for proxying (docker)
+
+NGINX reverse proxy example for the Mbin Docker instance:
+
+```nginx
+# Redirect HTTP to HTTPS
+server {
+    server_name domain.tld;
+    listen 80;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name domain.tld;
+
+    charset utf-8;
+
+    # TLS
+    ssl_certificate /etc/letsencrypt/live/domain.tld/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/domain.tld/privkey.pem;
+
+    # Don't leak powered-by
+    fastcgi_hide_header X-Powered-By;
+
+    # Security headers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "same-origin" always;
+    add_header X-Download-Options "noopen" always;
+    add_header X-Permitted-Cross-Domain-Policies "none" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    client_max_body_size 20M; # Max size of a file that a user can upload
+
+    # Logs
+    error_log /var/log/nginx/mbin_error.log;
+    access_log /var/log/nginx/mbin_access.log;
+
+    location / {
+        proxy_set_header HOST $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://127.0.0.1:8008;
+    }
+
+    location /.well-known/mercure {
+        proxy_pass http://127.0.0.1:8008$request_uri;
+        proxy_read_timeout 24h;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```

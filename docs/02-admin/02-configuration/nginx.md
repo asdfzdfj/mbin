@@ -195,8 +195,9 @@ server {
 }
 ```
 
-> [!WARNING]
-> If also want to also configure your `www.domain.tld` subdomain; our advise is to use a HTTP 301 redirect from the `www` subdomain towards the root domain. Do _NOT_ try to setup a double instance (you want to _avoid_ that ActivityPub will see `www` as a separate instance). See Nginx example below
+## Configure www subdomain to alias to main domain
+
+If you also want to configure your `www.domain.tld` subdomain; our advise is to use a HTTP 301 redirect from the `www` subdomain towards the root domain. Do _NOT_ try to setup a double instance, as you want to _avoid_ that ActivityPub will see `www` as a separate instance. See Nginx example below
 
 ```nginx
 # Example of a 301 redirect response for the www subdomain
@@ -223,6 +224,8 @@ server {
     return 301 https://domain.tld$request_uri;
 }
 ```
+
+## Save and apply
 
 Enable the NGINX site, using a symlink:
 

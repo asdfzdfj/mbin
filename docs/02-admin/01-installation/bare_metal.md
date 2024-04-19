@@ -235,42 +235,10 @@ upload_max_filesize = 8M
 post_max_size = 8M
 ; Remember the memory limit is per child process
 memory_limit = 256M
-; maximum memory allocated to store the results
+; maximum memory allocated to store the resolved realpath results
 realpath_cache_size = 4096K
 ; save the results for 10 minutes (600 seconds)
 realpath_cache_ttl = 600
-```
-
-Optionally also enable OPCache for improved performances with PHP:
-
-```ini
-opcache.enable=1
-opcache.enable_cli=1
-; Memory consumption (in MBs), personal preference
-opcache.memory_consumption=512
-; Internal string buffer (in MBs), personal preference
-opcache.interned_strings_buffer=128
-opcache.max_accelerated_files=100000
-; Enable PHP JIT
-opcache.jit_buffer_size=500M
-```
-
-More info: [Symfony Performance docs](https://symfony.com/doc/current/performance.html)
-
-Edit your PHP `www.conf` file as well, to increase the amount of PHP child processes (optional):
-
-```bash
-sudo nano /etc/php/8.2/fpm/pool.d/www.conf
-```
-
-With the content (these are personal preferences, adjust to your needs):
-
-```ini
-pm = dynamic
-pm.max_children = 60
-pm.start_servers = 10
-pm.min_spare_servers = 5
-pm.max_spare_servers = 10
 ```
 
 Be sure to restart (or reload) the PHP-FPM service after you applied any changing to the `php.ini` file:
@@ -278,6 +246,8 @@ Be sure to restart (or reload) the PHP-FPM service after you applied any changin
 ```bash
 sudo systemctl restart php8.2-fpm.service
 ```
+
+Refer to [PHP Performance Adjustments](../99-tuning/php.md) guide for more PHP performance settings.
 
 ### Composer
 
@@ -310,9 +280,8 @@ composer clear-cache
 
 ### Caching
 
-You can choose between either Redis or KeyDB.
-
-#### Redis
+> [!TIP]
+> See [Redis Alternative](../03-optional-features/redis_alternative.md) page if you wish to use Redis compatible alternatives, such as KeyDB.
 
 Edit `redis.conf` file:
 
@@ -344,52 +313,6 @@ REDIS_DNS=redis://${REDIS_PASSWORD}@$127.0.0.1:6379
 #REDIS_DNS=redis://${REDIS_PASSWORD}/var/run/redis/redis-server.sock
 # Or KeyDB socket file:
 #REDIS_DNS=redis://${REDIS_PASSWORD}/var/run/keydb/keydb.sock
-```
-
-#### KeyDB
-
-[KeyDB](https://github.com/Snapchat/KeyDB) is a fork of Redis. If you wish to use KeyDB instead, that is possible. Do **NOT** run both Redis & KeyDB, just pick one. After KeyDB run on the same default port 6379 (IANA #815344).
-
-Be sure you disabled redis first:
-
-```bash
-sudo systemctl stop redis
-sudo systemctl disable redis
-```
-
-Or even removed Redis: `sudo apt purge redis-server`
-
-For Debian/Ubuntu you can install KeyDB package repository via:
-
-```bash
-echo "deb https://download.keydb.dev/open-source-dist $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/keydb.list
-sudo wget -O /etc/apt/trusted.gpg.d/keydb.gpg https://download.keydb.dev/open-source-dist/keyring.gpg
-sudo apt update
-sudo apt install keydb
-```
-
-During the install you can choose between different installation methods, I advice to pick: "keydb", which comes with systemd files as well as the CLI tools (eg. `keydb-cli`).
-
-Start & enable the service if it isn't already:
-
-```bash
-sudo systemctl start keydb-server
-sudo systemctl enable keydb-server
-```
-
-Configuration file is located at: `/etc/keydb/keydb.conf`. See also: [config documentation](https://docs.keydb.dev/docs/config-file).  
-For example, you can also configure Unix socket files if you wish:
-
-```ini
-unixsocket /var/run/keydb/keydb.sock
-unixsocketperm 777
-```
-
-Optionally, if you want to set a password with KeyDB, _also add_ the following option to the bottom of the file:
-
-```ini
-# Replace {!SECRET!!KEY!-32_1-!} with the password generated earlier
-requirepass "{!SECRET!!KEY!-32_1-!}"
 ```
 
 ### PostgreSQL (Database)
@@ -515,33 +438,7 @@ startretries=10
 process_name=%(program_name)s_%(process_num)02d
 ```
 
-Save and close the file.
-
 Note: you can increase the number of running messenger jobs if your queue is building up (i.e. more messages are coming in than your messengers can handle)
-
-We also use supervisor for running Mercure job:
-
-```bash
-sudo nano /etc/supervisor/conf.d/mercure.conf
-```
-
-With the following content:
-
-```ini
-[program:mercure]
-command=/usr/local/bin/mercure run --config /var/www/mbin/metal/caddy/Caddyfile
-process_name=%(program_name)s_%(process_num)s
-numprocs=1
-environment=MERCURE_PUBLISHER_JWT_KEY="{!SECRET!!KEY!-32_3-!}",MERCURE_SUBSCRIBER_JWT_KEY="{!SECRET!!KEY!-32_3-!}",SERVER_NAME=":3000",HTTP_PORT="3000"
-directory=/var/www/mbin/metal/caddy
-autostart=true
-autorestart=true
-startsecs=5
-startretries=10
-user=www-data
-redirect_stderr=false
-stdout_syslog=true
-```
 
 Save and close the file. Restart supervisor jobs:
 

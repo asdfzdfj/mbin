@@ -89,4 +89,32 @@ Ensure not random formatting errors in the Caddyfile
 mercure fmt metal/caddy/Caddyfile --overwrite
 ```
 
-Mercure will be configured further in the next section (Supervisor).
+Configure Supervisor job for running Mercure
+
+```bash
+sudo nano /etc/supervisor/conf.d/mercure.conf
+```
+
+With the following content:
+
+```ini
+[program:mercure]
+command=/usr/local/bin/mercure run --config /var/www/mbin/metal/caddy/Caddyfile
+process_name=%(program_name)s_%(process_num)s
+numprocs=1
+environment=MERCURE_PUBLISHER_JWT_KEY="{!SECRET!!KEY!-32_3-!}",MERCURE_SUBSCRIBER_JWT_KEY="{!SECRET!!KEY!-32_3-!}",SERVER_NAME=":3000",HTTP_PORT="3000"
+directory=/var/www/mbin/metal/caddy
+autostart=true
+autorestart=true
+startsecs=5
+startretries=10
+user=www-data
+redirect_stderr=false
+stdout_syslog=true
+```
+
+Save and close the file. Restart supervisor jobs:
+
+```bash
+sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl start all
+```

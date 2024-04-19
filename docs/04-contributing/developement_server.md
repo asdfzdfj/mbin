@@ -6,9 +6,11 @@ Requirements:
 - NodeJS
 - Redis
 - PostgreSQL
-- _Optionally:_ Mercure
+- Mercure _(Optional)_
 
 ---
+
+Initial setup:
 
 - Increase execution time in PHP config file: `/etc/php/8.2/fpm/php.ini`:
 
@@ -25,19 +27,19 @@ sudo -u postgres psql
 
 - Create new mbin database user:
 
-```sql
+```bash
 sudo -u postgres createuser --createdb --createrole --pwprompt mbin
 ```
 
 - Correctly configured `.env` file (`cp .env.example .env`), these are only the changes you need to pay attention to:
 
-```env
+```sh
 # Set domain to 127.0.0.1:8000
 SERVER_NAME=127.0.0.1:8000
 KBIN_DOMAIN=127.0.0.1:8000
 KBIN_STORAGE_URL=http://127.0.0.1:8000/media
 
-#Redis (without password)
+# Redis (without password)
 REDIS_DNS=redis://127.0.0.1:6379
 
 # Set App configs
@@ -66,17 +68,28 @@ local   mbin            mbin                                    md5
 
 Starting the server:
 
-1. Install Symfony CLI: `wget https://get.symfony.com/cli/installer -O - | bash`
+1. Install Symfony CLI
+
+```sh
+wget https://get.symfony.com/cli/installer -O symfony-installer.sh
+bash symfony-installer.sh
+```
+
 2. Check the requirements: `symfony check:requirements`
 3. Install dependencies: `composer install`
 4. Dump `.env` into `.env.local.php` via: `composer dump-env dev`
-5. _Optionally:_ Increase verbosity log level in: `config/packages/monolog.yaml` in the `when@dev` section: `level: debug` (instead of `level: info`),
+5. Increase log level verbosity in `config/packages/monolog.yaml`
+   from `level: info` to `level: debug` in the `when@dev.monolog.handlers.*` section. _(Optional)_
 6. Clear cache: `APP_ENV=dev APP_DEBUG=1 php bin/console cache:clear -n`
 7. Start Mbin: `symfony server:start`
 8. Go to: [http://127.0.0.1:8000](http://127.0.0.1:8000/)
 
 This will give you a minimal working frontend with PostgreSQL setup. Keep in mind: this will _not_ start federating, for that you also need to setup Mercure to test the full Mbin setup.
 
-_Optionally:_ you could also setup RabbitMQ, but the Doctrine messenger configuration will be sufficient for local development.
+> [!TIP]
+> Optionally, you could also setup RabbitMQ, but the Doctrine messenger configuration will be sufficient for local development.
 
-More info: [Contributing guide](./README.md), [Admin guide](../02-admin/README.md) and [Symfony Local Web Server](https://symfony.com/doc/current/setup/symfony_server.html)
+More info:
+- [Contributing guide](./README.md)
+- [Admin guide](../02-admin/README.md)
+- [Symfony Local Web Server](https://symfony.com/doc/current/setup/symfony_server.html)

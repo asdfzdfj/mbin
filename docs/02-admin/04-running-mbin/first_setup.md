@@ -30,9 +30,7 @@ With an admin account, log in and create a magazine named "random" to which uncl
 
 ## Enable/disable Mercure
 
-If you are not going to use Mercure, you have to disable it in the Admin panel -> Settings -> "Mercure enabled" option.
-
-Make sure you have substituted all the passwords and configured the basic services.
+If you are not going to use Mercure, you have to [disable it in the Admin panel](../03-optional-features/mercure.md#enable-mercure).
 
 ## Setup Complete
 

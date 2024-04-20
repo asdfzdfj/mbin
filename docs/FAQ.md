@@ -96,56 +96,12 @@ Execute: `sudo rabbitmqctl status`, that should provide details about your Rabbi
 
 Ensure you do not see any connection errors in your `var/log/prod-{YYYY-MM-DD}.log` file.
 
-Talking about plugins, we advise to also enable the `rabbitmq_management` plugin by executing:
+It's also recommended to [enable RabbitMQ management plugin](./02-admin/06-recommendations/rabbitmq_monitor.md#rabbitmq-management-plugin).
 
-```sh
-sudo rabbitmq-plugins enable rabbitmq_management
-```
-
-Let's create a new admin user in RabbitMQ (replace `<user>` and `password` with a username & password you like to use):
-
-```sh
-sudo rabbitmqctl add_user <user> <password>
-```
-
-Give this new user administrator permissions (`-p /` is the virtual host path of RabbitMQ, which is `/` by default):
-
-```sh
-# Again don't forget to change <user> to your username in the lines below
-sudo rabbitmqctl set_user_tags <user> administrator
-sudo rabbitmqctl set_permissions -p / <user> ".*" ".*" ".*"
-```
-
-Now you can open the RabbitMQ management page: (insecure connection!) `http://<server-ip>:15672` with the username and the password provided earlier. [More info can be found here](https://www.rabbitmq.com/management.html#getting-started).
-
-See screenshot below of a typical small instance of Mbin running RabbitMQ management interface (having 4k or even 10k for "Queued message" is normal after recent Mbin changes, see [this section](#messenger-queue-is-building-up-even-though-my-messengers-are-idling) and below for details):
+See screenshot below of RabbitMQ management interface for a typical load of small Mbin instance.
+Note that having 4k or even 10k for "Queued message" is normal after recent Mbin changes, see [this section](#messenger-queue-is-building-up-even-though-my-messengers-are-idling) and below for details:
 
 ![Typical load on very small instances](images/rabbit_small_load_typical.png)
-
-### RabbitMQ Prometheus exporter
-
-See [RabbitMQ Docs](https://rabbitmq.com/prometheus.html)
-
-If you are running the prometheus exporter plugin you do not have queue specific metrics by default.
-There is another endpoint with the default config that you can scrape, that will return queue metrics for our default virtual host `/`: `/metrics/detailed?vhost=%2F&family=queue_metrics`
-
-Example scrape config:
-
-```yaml
-scrape_configs:
-  - job_name: "mbin-rabbit_queues"
-    static_configs:
-      - targets: ["example.org"]
-    metrics_path: "/metrics/detailed"
-    params:
-      vhost: ["/"]
-      family:
-        [
-          "queue_coarse_metrics",
-          "queue_consumer_count",
-          "channel_queue_metrics",
-        ]
-```
 
 <!-- contemplating moving this into a separate page if it gets long enough -->
 ## Common Problems and Troubleshooting

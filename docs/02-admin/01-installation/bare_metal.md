@@ -360,7 +360,7 @@ Refer to [PHP Performance Adjustments](../99-tuning/php.md) guide for more PHP p
 ### Caching (Redis)
 
 > [!TIP]
-> Refer to [this page](../03-optional-features/redis_alternative.md) if you want to use a different Redis compatible service, such as KeyDB
+> Refer to [this page](../06-recommendations/redis_alternative.md) if you want to use a different Redis compatible service, such as KeyDB
 
 Set up Redis for caching backend.
 

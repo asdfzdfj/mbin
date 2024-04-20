@@ -23,11 +23,11 @@ There is also a **very good** [forum post on activitypub.rocks](https://socialhu
 
 ### How to setup my own Mbin instance?
 
-Have a look at our guides. A bare metal/VM setup is **recommended** at this time, however we do provide a Docker setup as well.
+Have a look at our [installation guides](./02-admin/README.md). A bare metal/VM setup is **recommended** at this time, however we do provide a Docker setup as well.
 
 ### Should I run development mode?
 
-**NO!** Try to avoid running development mode when you are hosting our own _public_ instance. Running in development mode can cause sensitive data to be leaked, such as secret keys or passwords (eg. via development console). Development mode will log a lot of messages to disk (incl. stacktraces).
+**NO!** Try to avoid running development mode when you are hosting your own _public_ instance. Running in development mode can cause sensitive data to be leaked, such as secret keys or passwords (e.g. via development console). Development mode will also log a lot of messages to disk (incl. stacktraces) which may have negative performance impact.
 
 That said, if you are _experiencing serious issues_ with your instance which you cannot resolve by looking at the log file (`prod-{YYYY-MM-DD}.log`) or server logs, you can try running in development mode to debug the problem or issue you are having. Enabling development mode **during development** is also very useful.
 
@@ -41,7 +41,7 @@ See also our [contributing page](https://github.com/MbinOrg/mbin/blob/main/CONTR
 
 ### How can I contribute?
 
-New contributors are always _warmly welcomed_ to join us. The most valuable contributions come from helping with bug fixes and features through Pull Requests.
+New contributors are _always welcome_ to join us. The most valuable contributions come from helping with bug fixes and features through Pull Requests,
 As well as helping out with [translations](https://hosted.weblate.org/engage/mbin/) and documentation.
 
 Read more on our [contributing page](https://github.com/MbinOrg/mbin/blob/main/CONTRIBUTING.md).
@@ -60,17 +60,19 @@ As a part of our software development and discussions, Matrix is our primary pla
 
 Mercure is a _real-time communication protocol_ and server that facilitates _server-sent events_ for web applications. It enables _real-time updates_ by allowing clients to subscribe and receiving updates pushed by the server.
 
-Mbin uses Mercure (optionally), on very large instances you might want to consider disabling Mercure whenever it _degrates_ our server performance.
+Mbin optionally uses Mercure, on very large instances you might want to consider disabling Mercure whenever it _degrades_ your server performance.
 
 ### What is Redis?
 
-Redis is a _persinstent key-value store_, which can help for caching purposes or other storage requirements. We **recommend** to setup Redis when running Mbin, but Redis is optional.
+Redis is an _in-memory data store_, which can help for caching purposes or other requirements. We **recommend** to setup Redis when running Mbin, but Redis is optional.
 
 ### What is RabbitMQ?
 
-RabbitMQ is an open-source _message broker_ software that facilitates the exchange of messages between different server instances (in our case ActivityPub messages), using queues to store and manage messages.
+RabbitMQ is an open-source _message broker_ software that facilitates the exchange of messages between different subsystems, using queues to store and manage messages.
 
-We highly **recommend** to setup RabbitMQ on your Mbin instance, but RabbitMQ is optional. Failed messages are no longer stored in RabbitMQ, but in PostgreSQL instead (table: `public.messenger_messages`).
+Mbin uses RabbitMQ as the message queue transport for [Symfony Messenger](https://symfony.com/doc/current/messenger.html) to perform various tasks, including exchange ActivityPub messages with other services.
+
+We highly **recommend** to setup RabbitMQ on your Mbin instance. Failed messages are no longer stored in RabbitMQ, but in PostgreSQL instead (table: `public.messenger_messages`).
 
 ## Service Monitoring
 
@@ -114,7 +116,9 @@ sudo rabbitmqctl set_user_tags <user> administrator
 sudo rabbitmqctl set_permissions -p / <user> ".*" ".*" ".*"
 ```
 
-Now you can open the RabbitMQ management page: (insecure connection!) `http://<server-ip>:15672` with the username and the password provided earlier. [More info can be found here](https://www.rabbitmq.com/management.html#getting-started). See screenshot below of a typical small instance of Mbin running RabbitMQ management interface ("Queued message" of 4k or even 10k is normal after recent Mbin changes, see down below for more info):
+Now you can open the RabbitMQ management page: (insecure connection!) `http://<server-ip>:15672` with the username and the password provided earlier. [More info can be found here](https://www.rabbitmq.com/management.html#getting-started).
+
+See screenshot below of a typical small instance of Mbin running RabbitMQ management interface (having 4k or even 10k for "Queued message" is normal after recent Mbin changes, see [this section](#messenger-queue-is-building-up-even-though-my-messengers-are-idling) and below for details):
 
 ![Typical load on very small instances](images/rabbit_small_load_typical.png)
 
@@ -202,9 +206,14 @@ RabbitMQ will now have new queues being added for the different delays (so a mes
 The global overview from RabbitMQ shows the ready messages for all queues combined. Messages in the retry queues count as ready messages the whole time they are in there,
 so for a correct ready count you have to go to the queue specific overview.
 
-| Overview                                                  | Queue Tab                                           | "Message" Queue Overview                                            |
-| --------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------- |
-| ![Queued messages](images/rabbit_queue_overview.png) | ![Queue overview](images/rabbit_queue_tab.png) | ![Message Queue Overview](images/rabbit_messages_overview.png) |
+**Overview**  
+![Queued messages](images/rabbit_queue_overview.png) 
+
+**Queue Tab**  
+![Queue overview](images/rabbit_queue_tab.png)
+
+**"Message" Queue Overview**  
+![Message Queue Overview](images/rabbit_messages_overview.png) 
 
 ### How to clean-up all failed messages?
 

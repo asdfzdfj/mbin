@@ -28,37 +28,37 @@ For all the API endpoints go to the swagger documentation page, which is: `https
 
 1. Create a private OAuth2 client (for use in secure environments that you control)
 
-```
+```http
 POST /api/client
 
 {
-  "name": "My OAuth2 Authorization Code Client",
-  "contactEmail": "contact@some.dev",
-  "description": "A client that I will be using to authenticate to mbin's API",
-  "public": false,
-  "redirectUris": [
-    "https://localhost:3000/redirect",
-    "myapp://redirect"
-  ],
-  "grants": [
-    "authorization_code",
-    "refresh_token"
-  ],
-  # All the scopes the client will be allowed to request
-  # See following section for a list of available fine grained scopes.
-  "scopes": [
-    "read"
-  ]
+    "name": "My OAuth2 Authorization Code Client",
+    "contactEmail": "contact@some.dev",
+    "description": "A client that I will be using to authenticate to mbin's API",
+    "public": false,
+    "redirectUris": [
+        "https://localhost:3000/redirect",
+        "myapp://redirect"
+    ],
+    "grants": [
+        "authorization_code",
+        "refresh_token"
+    ],
+    # All the scopes the client will be allowed to request
+    # See following section for a list of available fine grained scopes.
+    "scopes": [
+        "read"
+    ]
 }
 ```
 
 2. Save the identifier and secret returned by this API call - this will be the only time you can access the secret for a private client.
 
-```
+```json
 {
     "identifier": "someRandomString",
     "secret": "anEvenLongerRandomStringThatYouShouldKeepSafe",
-    ... # more info about the client that just confirms what you've created
+    # ... more info about the client that just confirms what you've created
 }
 ```
 
@@ -66,7 +66,7 @@ POST /api/client
 
    1. Begin authorization_code OAuth2 flow
 
-   ```
+   ```http
    GET /authorize?response_type=code&client_id=(the client id generated at client creation)&redirect_uri=(One of the URIs added during client creation)&scope=(space-delimited list of scopes)&state=(random string for CSRF protection)
    ```
 
@@ -74,7 +74,7 @@ POST /api/client
    3. When the user grants their consent, their browser will be redirected to the given redirect_uri with a `code` query parameter, as long as it matches one of the URIs provided when the client was created.
    4. After obtaining the code, obtain an authorization token with a multipart/form-data POST request:
 
-   ```
+   ```http
    POST /token
 
    grant_type=authorization_code
@@ -88,16 +88,14 @@ POST /api/client
 
    ```json
    {
-     "token_type": "Bearer",
-     "expires_in": 3600, // seconds
-     "access_token": "aLargeEncodedTokenToBeUsedInTheAuthorizationHeader",
-     "refresh_token": "aLargeEncodedTokenToBeUsedInTheRefreshTokenFlow"
+       "token_type": "Bearer",
+       "expires_in": 3600, // seconds
+       "access_token": "aLargeEncodedTokenToBeUsedInTheAuthorizationHeader",
+       "refresh_token": "aLargeEncodedTokenToBeUsedInTheRefreshTokenFlow"
    }
    ```
 
-## Available Scopes
-
-### Scope tree
+## Available Scopes Tree
 
 1. `read` - Allows retrieval of threads from the user's subscribed magazines/domains and viewing the user's favorited entries.
 2. `write` - Provides all of the following nested scopes

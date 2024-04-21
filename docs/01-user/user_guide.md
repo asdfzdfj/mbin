@@ -52,7 +52,7 @@ username before you can take any actions on the platform. However, **you will ha
 
 ### User settings
 
-You are now ready to start using /mbin to connect with others. You can access your account settings at any time by clicking on your username located in the header.
+You are now ready to start using mbin to connect with others. You can access your account settings at any time by clicking on your username located in the header.
 
 (pic3)
 

@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # FAQ
 
 See below our Frequently Asked Questions (FAQ). The questions (and corresponding answers) below are in random order.

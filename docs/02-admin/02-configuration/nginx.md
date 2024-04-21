@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # NGINX
 
 We will use NGINX as reverse proxy between the public site and various backend services (static files, PHP and Mercure).

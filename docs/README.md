@@ -1,3 +1,7 @@
+---
+sidebar_position: 0
+---
+
 # Documentation
 
 We split up the documentation for:

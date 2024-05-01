@@ -1,23 +1,23 @@
-{%- set V_TRUE = constant('App\\Controller\\User\\ThemeSettingsController::TRUE') -%}
-{%- set V_FALSE = constant('App\\Controller\\User\\ThemeSettingsController::FALSE') -%}
-{%- set V_LEFT = constant('App\\Controller\\User\\ThemeSettingsController::LEFT') -%}
-{%- set V_RIGHT = constant('App\\Controller\\User\\ThemeSettingsController::RIGHT') -%}
-{%- set V_FIXED = constant('App\\Controller\\User\\ThemeSettingsController::FIXED') -%}
-{%- set V_LAST_ACTIVE = constant('App\\Controller\\User\\ThemeSettingsController::LAST_ACTIVE') -%}
+{%- set V_TRUE = theme_setting_constant('TRUE') -%}
+{%- set V_FALSE = theme_setting_constant('FALSE') -%}
+{%- set V_LEFT = theme_setting_constant('LEFT') -%}
+{%- set V_RIGHT = theme_setting_constant('RIGHT') -%}
+{%- set V_FIXED = theme_setting_constant('FIXED') -%}
+{%- set V_LAST_ACTIVE = theme_setting_constant('LAST_ACTIVE') -%}
 
-{%- set FONT_SIZE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_FONT_SIZE'), '100') -%}
-{%- set THEME = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_THEME'), mbin_default_theme()) -%}
-{%- set PAGE_WIDTH = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_PAGE_WIDTH'), V_FIXED) -%}
-{%- set ROUNDED_EDGES = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_ROUNDED_EDGES'), V_TRUE) -%}
-{%- set TOPBAR = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_TOPBAR'), V_FALSE) -%}
-{%- set FIXED_NAVBAR = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_FIXED_NAVBAR'), V_FALSE) -%}
-{%- set SIDEBAR_POSITION = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_SIDEBAR_POSITION'), V_RIGHT) -%}
-{%- set COMPACT = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT'), V_FALSE) -%}
+{%- set FONT_SIZE = theme_setting_value('KBIN_FONT_SIZE', '100') -%}
+{%- set THEME = theme_setting_value('KBIN_THEME', mbin_default_theme()) -%}
+{%- set PAGE_WIDTH = theme_setting_value('KBIN_PAGE_WIDTH', V_FIXED) -%}
+{%- set ROUNDED_EDGES = theme_setting_value('KBIN_GENERAL_ROUNDED_EDGES', V_TRUE) -%}
+{%- set TOPBAR = theme_setting_value('KBIN_GENERAL_TOPBAR', V_FALSE) -%}
+{%- set FIXED_NAVBAR = theme_setting_value('KBIN_GENERAL_FIXED_NAVBAR', V_FALSE) -%}
+{%- set SIDEBAR_POSITION = theme_setting_value('KBIN_GENERAL_SIDEBAR_POSITION', V_RIGHT) -%}
+{%- set COMPACT = theme_setting_value('KBIN_ENTRIES_COMPACT', V_FALSE) -%}
 
-{%- set SUBSCRIPTIONS_SHOW = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SHOW'), V_TRUE) -%}
-{%- set SUBSCRIPTIONS_SEPARATE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR'), V_FALSE) -%}
-{%- set SUBSCRIPTIONS_SAME_SIDE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE'), V_FALSE) -%}
-{%- set SUBSCRIPTIONS_SORT = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SORT'), V_LAST_ACTIVE) -%}
+{%- set SUBSCRIPTIONS_SHOW = theme_setting_value('KBIN_SUBSCRIPTIONS_SHOW', V_TRUE) -%}
+{%- set SUBSCRIPTIONS_SEPARATE = theme_setting_value('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', V_FALSE) -%}
+{%- set SUBSCRIPTIONS_SAME_SIDE = theme_setting_value('KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE', V_FALSE) -%}
+{%- set SUBSCRIPTIONS_SORT = theme_setting_value('KBIN_SUBSCRIPTIONS_SORT', V_LAST_ACTIVE) -%}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}"
       style="font-size: {{ FONT_SIZE~'%' }}">

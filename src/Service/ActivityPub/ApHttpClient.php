@@ -315,7 +315,7 @@ class ApHttpClient
         $signatureHeader = 'keyId="'.$keyId.'",headers="'.$signedHeaders.'",algorithm="rsa-sha256",signature="'.$signature.'"';
         unset($headers['(request-target)']);
         $headers['Signature'] = $signatureHeader;
-        $headers['User-Agent'] = $this->projectInfo->getUserAgent().'/'.$this->projectInfo->getVersion().' (+https://'.$this->kbinDomain.'/agent)';
+        $headers['User-Agent'] = $this->projectInfo->getUserAgent();
         $headers['Accept'] = 'application/activity+json';
         $headers['Content-Type'] = 'application/activity+json';
 
@@ -335,7 +335,7 @@ class ApHttpClient
         $signatureHeader = 'keyId="'.$keyId.'",headers="'.$signedHeaders.'",algorithm="rsa-sha256",signature="'.$signature.'"';
         unset($headers['(request-target)']);
         $headers['Signature'] = $signatureHeader;
-        $headers['User-Agent'] = $this->projectInfo->getUserAgent().'/'.$this->projectInfo->getVersion().' (+https://'.$this->kbinDomain.'/agent)';
+        $headers['User-Agent'] = $this->projectInfo->getUserAgent();
         if (ApRequestType::WebFinger === $requestType) {
             $headers['Accept'] = 'application/jrd+json';
             $headers['Content-Type'] = 'application/jrd+json';

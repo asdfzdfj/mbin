@@ -1,0 +1,196 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service;
+
+class ThemeSettingsManager
+{
+    public const KBIN_LANG = 'kbin_lang';
+    public const ENTRIES_VIEW = 'entries_view';
+    public const ENTRY_COMMENTS_VIEW = 'entry_comments_view';
+    public const POST_COMMENTS_VIEW = 'post_comments_view';
+
+    public const KBIN_THEME = 'kbin_theme';
+    public const KBIN_FONT_SIZE = 'kbin_font_size';
+    public const KBIN_PAGE_WIDTH = 'kbin_page_width';
+    public const KBIN_ENTRIES_SHOW_USERS_AVATARS = 'kbin_entries_show_users_avatars';
+    public const KBIN_ENTRIES_SHOW_MAGAZINES_ICONS = 'kbin_entries_show_magazines_icons';
+    public const KBIN_ENTRIES_SHOW_THUMBNAILS = 'kbin_entries_show_thumbnails';
+    public const KBIN_ENTRIES_SHOW_PREVIEW = 'kbin_entries_show_preview';
+    public const KBIN_ENTRIES_COMPACT = 'kbin_entries_compact';
+    public const KBIN_POSTS_SHOW_PREVIEW = 'kbin_posts_show_preview';
+    public const KBIN_POSTS_SHOW_USERS_AVATARS = 'kbin_posts_show_users_avatars';
+    public const KBIN_GENERAL_ROUNDED_EDGES = 'kbin_general_rounded_edges';
+    public const KBIN_GENERAL_INFINITE_SCROLL = 'kbin_general_infinite_scroll';
+    public const KBIN_GENERAL_TOPBAR = 'kbin_general_topbar';
+    public const KBIN_GENERAL_FIXED_NAVBAR = 'kbin_general_fixed_navbar';
+    public const KBIN_GENERAL_SIDEBAR_POSITION = 'kbin_general_sidebar_position';
+    public const KBIN_GENERAL_DYNAMIC_LISTS = 'kbin_general_dynamic_lists';
+    public const KBIN_GENERAL_FILTER_LABELS = 'kbin_general_filter_labels';
+    public const KBIN_COMMENTS_SHOW_USER_AVATAR = 'kbin_comments_show_user_avatar';
+    public const KBIN_COMMENTS_REPLY_POSITION = 'kbin_comments_reply_position';
+    public const KBIN_SUBSCRIPTIONS_SHOW = 'kbin_subscriptions_show';
+    public const KBIN_SUBSCRIPTIONS_SORT = 'kbin_subscriptions_sort';
+    public const KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR = 'kbin_subscriptions_in_separate_sidebar';
+    public const KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE = 'kbin_subscriptions_sidebars_same_side';
+    public const KBIN_SUBSCRIPTIONS_LARGE_PANEL = 'kbin_subscriptions_large_panel';
+    public const KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON = 'kbin_subscriptions_show_magazine_icon';
+
+    public const CLASSIC = 'classic';
+    public const CHAT = 'chat';
+    public const TREE = 'tree';
+    public const COMPACT = 'compact';
+    public const LIGHT = 'light';
+    public const DARK = 'dark';
+    public const KBIN = 'kbin';
+    public const SOLARIZED_LIGHT = 'solarized-light';
+    public const SOLARIZED_DARK = 'solarized-dark';
+    public const TOKYO_NIGHT = 'tokyo-night';
+    public const TRUE = 'true';
+    public const FALSE = 'false';
+    public const LEFT = 'left';
+    public const RIGHT = 'right';
+    public const TOP = 'top';
+    public const BOTTOM = 'bottom';
+    public const ALPHABETICALLY = 'alphabetically';
+    public const LAST_ACTIVE = 'last_active';
+    public const MAX = 'max';
+    public const AUTO = 'auto';
+    public const FIXED = 'fixed';
+    public const ON = 'on';
+    public const OFF = 'off';
+
+    public const HARDCODED_DEFAULTS = [
+        /*self::KBIN_LANG =>,
+        self::ENTRIES_VIEW =>,*/
+        self::ENTRY_COMMENTS_VIEW => self::TREE,
+        self::POST_COMMENTS_VIEW => self::TREE,
+
+        self::KBIN_THEME => 'default',
+        self::KBIN_FONT_SIZE => '100',
+        self::KBIN_GENERAL_SIDEBAR_POSITION => self::RIGHT,
+        self::KBIN_PAGE_WIDTH => self::FIXED,
+        self::KBIN_GENERAL_FILTER_LABELS => self::ON,
+        self::KBIN_GENERAL_DYNAMIC_LISTS => self::FALSE,
+        self::KBIN_GENERAL_ROUNDED_EDGES => self::FALSE,
+        self::KBIN_GENERAL_INFINITE_SCROLL => self::FALSE,
+        self::KBIN_GENERAL_FIXED_NAVBAR => self::FALSE,
+        self::KBIN_GENERAL_TOPBAR => self::FALSE,
+
+        self::KBIN_SUBSCRIPTIONS_SHOW => self::TRUE,
+        self::KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON => self::TRUE,
+        self::KBIN_SUBSCRIPTIONS_SORT => self::LAST_ACTIVE,
+        self::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR => self::FALSE,
+        self::KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE => self::FALSE,
+        self::KBIN_SUBSCRIPTIONS_LARGE_PANEL => self::FALSE,
+
+        self::KBIN_ENTRIES_SHOW_PREVIEW => self::FALSE,
+        self::KBIN_ENTRIES_COMPACT => self::TRUE,
+        self::KBIN_ENTRIES_SHOW_USERS_AVATARS => self::FALSE,
+        self::KBIN_ENTRIES_SHOW_MAGAZINES_ICONS => self::FALSE,
+        self::KBIN_ENTRIES_SHOW_THUMBNAILS => self::TRUE,
+
+        self::KBIN_POSTS_SHOW_PREVIEW => self::FALSE,
+        self::KBIN_POSTS_SHOW_USERS_AVATARS => self::TRUE,
+
+        self::KBIN_COMMENTS_REPLY_POSITION => self::TOP,
+        self::KBIN_COMMENTS_SHOW_USER_AVATAR => self::TRUE,
+    ];
+
+    public const KEYS = [
+        self::ENTRIES_VIEW,
+        self::ENTRY_COMMENTS_VIEW,
+        self::POST_COMMENTS_VIEW,
+        self::KBIN_THEME,
+        self::KBIN_FONT_SIZE,
+        self::KBIN_PAGE_WIDTH,
+        self::KBIN_ENTRIES_SHOW_USERS_AVATARS,
+        self::KBIN_ENTRIES_SHOW_MAGAZINES_ICONS,
+        self::KBIN_ENTRIES_SHOW_THUMBNAILS,
+        self::KBIN_ENTRIES_COMPACT,
+        self::KBIN_GENERAL_ROUNDED_EDGES,
+        self::KBIN_GENERAL_INFINITE_SCROLL,
+        self::KBIN_GENERAL_TOPBAR,
+        self::KBIN_GENERAL_FIXED_NAVBAR,
+        self::KBIN_GENERAL_SIDEBAR_POSITION,
+        self::KBIN_GENERAL_FILTER_LABELS,
+        self::KBIN_ENTRIES_SHOW_PREVIEW,
+        self::KBIN_POSTS_SHOW_PREVIEW,
+        self::KBIN_POSTS_SHOW_USERS_AVATARS,
+        self::KBIN_GENERAL_DYNAMIC_LISTS,
+        self::KBIN_LANG,
+        self::KBIN_COMMENTS_SHOW_USER_AVATAR,
+        self::KBIN_COMMENTS_REPLY_POSITION,
+        self::KBIN_SUBSCRIPTIONS_SHOW,
+        self::KBIN_SUBSCRIPTIONS_SORT,
+        self::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR,
+        self::KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE,
+        self::KBIN_SUBSCRIPTIONS_LARGE_PANEL,
+        self::KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON,
+    ];
+
+    public const VALUES = [
+        self::CLASSIC,
+        self::CHAT,
+        self::TREE,
+        self::COMPACT,
+        self::LIGHT,
+        self::DARK,
+        self::KBIN,
+        self::SOLARIZED_LIGHT,
+        self::SOLARIZED_DARK,
+        self::TOKYO_NIGHT,
+        self::TRUE,
+        self::FALSE,
+        self::LEFT,
+        self::RIGHT,
+        self::TOP,
+        self::BOTTOM,
+        self::ALPHABETICALLY,
+        self::LAST_ACTIVE,
+        self::ON,
+        self::OFF,
+        '80',
+        '90',
+        '100',
+        '120',
+        '150',
+        self::MAX,
+        self::AUTO,
+        self::FIXED,
+    ];
+
+    /**
+     * self reflector used to access self constants by key name.
+     */
+    private \ReflectionClass $reflector;
+
+    public function __construct(
+        private readonly SettingsManager $settings,
+    ) {
+        $this->reflector = new \ReflectionClass(self::class);
+    }
+
+    /**
+     * get a default value key for a particular setting key.
+     *
+     * @return ?string default value of the provided constant key
+     */
+    public function getDefaultSetting(string $key): ?string
+    {
+        if (!$this->reflector->hasConstant($key)) {
+            throw new \InvalidArgumentException("Unknown theme setting key '{$key}'");
+        }
+
+        // @todo provide all defaults for all const keys
+        // and replace null coalese with throw on unknown keys
+        $keyValue = $this->reflector->getConstant($key);
+        $value = match ($keyValue) {
+            self::KBIN_THEME => $this->settings->get('MBIN_DEFAULT_THEME'),
+            default => self::HARDCODED_DEFAULTS[$keyValue] ?? null,
+        };
+
+        return $value;
+    }
+}

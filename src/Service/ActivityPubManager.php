@@ -35,6 +35,8 @@ use App\Service\ActivityPub\ApObjectExtractor;
 use App\Service\ActivityPub\Webfinger\WebFinger;
 use App\Service\ActivityPub\Webfinger\WebFingerFactory;
 use App\Utils\ArrayTool;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use League\HTMLToMarkdown\HtmlConverter;
@@ -543,65 +545,9 @@ class ActivityPubManager
             if (null !== $magazine->apAttributedToUrl) {
                 try {
                     $this->logger->debug('fetching moderators of remote magazine "{magUrl}"', ['magUrl' => $actorUrl]);
-                    $attributedObj = $this->apHttpClient->getCollectionObject($magazine->apAttributedToUrl);
-                    $items = null;
-                    if (isset($attributedObj['items']) and \is_array($attributedObj['items'])) {
-                        $items = $attributedObj['items'];
-                    } elseif (isset($attributedObj['orderedItems']) and \is_array($attributedObj['orderedItems'])) {
-                        $items = $attributedObj['orderedItems'];
-                    }
-
-                    $this->logger->debug('got moderator items for magazine "{magName}": {json}', ['magName' => $magazine->name, 'json' => json_encode($attributedObj)]);
-
-                    if (null !== $items) {
-                        $moderatorsToRemove = [];
-                        /** @var Moderator $mod */
-                        foreach ($magazine->moderators as $mod) {
-                            if (!$mod->isOwner) {
-                                $moderatorsToRemove[] = $mod->user;
-                            }
-                        }
-                        $indexesNotToRemove = [];
-
-                        foreach ($items as $item) {
-                            if (\is_string($item)) {
-                                try {
-                                    $user = $this->findActorOrCreate($item);
-                                    if ($user instanceof User) {
-                                        foreach ($moderatorsToRemove as $key => $existMod) {
-                                            if ($existMod->username === $user->username) {
-                                                $indexesNotToRemove[] = $key;
-                                                break;
-                                            }
-                                        }
-                                        if (!$magazine->userIsModerator($user)) {
-                                            $this->logger->info('adding "{user}" as moderator in "{magName}" because they are a mod upstream, but not locally', ['user' => $user->username, 'magName' => $magazine->name]);
-                                            $this->magazineManager->addModerator(new ModeratorDto($magazine, $user, null));
-                                        }
-                                    }
-                                } catch (\Exception) {
-                                    $this->logger->warning('Something went wrong while fetching actor "{actor}" as moderator of "{magName}"', ['actor' => $item, 'magName' => $magazine->name]);
-                                }
-                            }
-                        }
-
-                        foreach ($indexesNotToRemove as $i) {
-                            $moderatorsToRemove[$i] = null;
-                        }
-
-                        foreach ($moderatorsToRemove as $modToRemove) {
-                            if (null === $modToRemove) {
-                                continue;
-                            }
-                            $criteria = Criteria::create()->where(Criteria::expr()->eq('magazine', $magazine));
-                            $modObject = $modToRemove->moderatorTokens->matching($criteria)->first();
-                            $this->logger->info('removing "{exMod}" from "{magName}" as mod locally because they are no longer mod upstream', ['exMod' => $modToRemove->username, 'magName' => $magazine->name]);
-                            $this->magazineManager->removeModerator($modObject, null);
-                        }
-                    } else {
-                        $this->logger->warning('could not update the moderators of "{url}", the response doesn\'t have a "items" or "orderedItems" property or it is not an array', ['url' => $actorUrl]);
-                    }
-                } catch (InvalidApPostException $ignored) {
+                    $this->updateMagazineModerators($magazine, false);
+                } catch (InvalidApPostException) {
+                    // skip if cannot update
                 }
             }
 
@@ -617,6 +563,121 @@ class ActivityPubManager
         }
 
         return null;
+    }
+
+    public function updateMagazineModerators(Magazine $magazine, bool $flush = true)
+    {
+        $attributedObj = $this->apHttpClient->getCollectionObject($magazine->apAttributedToUrl);
+
+        if (isset($attributedObj['items']) && \is_array($attributedObj['items'])) {
+            /** @var array $items */
+            $items = $attributedObj['items'];
+        } elseif (isset($attributedObj['orderedItems']) && \is_array($attributedObj['orderedItems'])) {
+            /** @var array $items */
+            $items = $attributedObj['orderedItems'];
+        } else {
+            $this->logger->warning(
+                'could not update the moderators of "{url}": supplied object does not have processable items',
+                ['url' => $magazine->apProfileId, 'attributedTo' => $attributedObj]
+            );
+
+            return;
+        }
+
+        $this->logger->debug(
+            'got moderator items for magazine "{magazine}"',
+            ['magazine' => $magazine->name, 'attributedTo' => $attributedObj]
+        );
+
+        /** @var Collection<User> $existingModerators */
+        $existingModerators = $magazine->moderators
+            ->filter(fn (Moderator $mod) => !$mod->isOwner)
+            ->map(fn (Moderator $mod) => $mod->user);
+
+        /** @var Collection<User> $updatedModerators */
+        $updatedModerators = new ArrayCollection();
+        foreach ($items as $item) {
+            // normalize item to ap id url string
+            $modApId = match (true) {
+                \is_string($item) => $item,
+                \is_array($item) => $item['id'] ?? null,
+                default => null,
+            };
+
+            if (!$modApId) {
+                continue;
+            }
+
+            // fetch a user and see if they need to be added/removed
+            try {
+                $user = $this->findActorOrCreate($modApId);
+                if ($user instanceof User) {
+                    $updatedModerators->add($user);
+                }
+            } catch (\Exception $e) {
+                $this->logger->warning(
+                    'Something went wrong while fetching actor "{actor}" as moderator of "{magName}"',
+                    ['actor' => $modApId, 'magName' => $magazine->name, 'error' => $e]
+                );
+            }
+        }
+
+        // ok, naive array_diff of User entity array doesn't work
+        // diff the collection of mods to process
+        $newModerators = $this
+            ->collectionDiff($updatedModerators, $existingModerators)
+            ->filter(fn (User $user) => !$magazine->userIsModerator($user));
+        $removedModerators = $this
+            ->collectionDiff($existingModerators, $updatedModerators)
+            ->filter(fn (User $user) => $magazine->userIsModerator($user));
+
+        $this->logger->debug('updated mod state for magazine {magazine}', [
+            'magazine' => $magazine->name,
+            'added' => $newModerators
+                ->map(fn (User $user) => ['id' => $user->getId(), 'username' => $user->username])->getValues(),
+            'removed' => $removedModerators
+                ->map(fn (User $user) => ['id' => $user->getId(), 'username' => $user->username])->getValues(),
+        ]);
+
+        // adding new mod
+        /** @var User $newMod */
+        foreach ($newModerators->getIterator() as $newMod) {
+            $this->logger->info(
+                'adding "{user}" as moderator in "{magName}" because they are a mod upstream, but not locally',
+                ['user' => $newMod->username, 'magName' => $magazine->name]
+            );
+
+            $this->magazineManager->addModerator(new ModeratorDto($magazine, $newMod, null));
+        }
+
+        // remove old mods
+        /** @var User $exMod */
+        foreach ($removedModerators->getIterator() as $exMod) {
+            $this->logger->info(
+                'removing "{exMod}" from "{magName}" as mod locally because they are no longer mod upstream',
+                ['exMod' => $exMod->username, 'magName' => $magazine->name]
+            );
+
+            $criteria = Criteria::create()->where(Criteria::expr()->eq('magazine', $magazine));
+            $modToken = $exMod->moderatorTokens->matching($criteria)->first();
+            $this->magazineManager->removeModerator($modToken, null);
+        }
+
+        if ($flush) {
+            $this->entityManager->flush();
+        }
+    }
+
+    /**
+     * perform a diff of collection (exists in a but not in b).
+     *
+     * this is probably very unoptimized.
+     */
+    private function collectionDiff(Collection $a, Collection $b): Collection
+    {
+        $diff = $a->filter(fn ($item) => !$b->contains($item));
+
+        return $diff;
     }
 
     public function createInboxesFromCC(array $activity, User $user): array

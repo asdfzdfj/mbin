@@ -25,7 +25,7 @@ class CommunityLinkParser implements InlineParserInterface
 
     public function getMatchDefinition(): InlineParserMatch
     {
-        return InlineParserMatch::regex('\B!(\w{1,30})(?:@)?((?:[\pL\pN\pS\pM\-\_]++\.)+[\pL\pN\pM]++|[a-z0-9\-\_]++)?');
+        return InlineParserMatch::regex('\B!(\w+)(@(?:[\pL\pN\pS\pM\-\_]++\.)+[a-z0-9\-\_]++|[\pL\pN\pM]++)?');
     }
 
     public function parse(InlineParserContext $ctx): bool
@@ -35,7 +35,7 @@ class CommunityLinkParser implements InlineParserInterface
 
         $matches = $ctx->getSubMatches();
         $handle = $matches['0'];
-        $domain = $matches['1'] ?? $this->settingsManager->get('KBIN_DOMAIN');
+        $domain = $this->extractDomain($matches['1']) ?? $this->settingsManager->get('KBIN_DOMAIN');
 
         $fullHandle = $handle.'@'.$domain;
         $isRemote = $this->isRemoteCommunity($domain);
@@ -71,6 +71,15 @@ class CommunityLinkParser implements InlineParserInterface
         $ctx->getContainer()->appendChild(new UnresolvableLink('!'.$handle));
 
         return true;
+    }
+
+    private function extractDomain(?string $match): ?string
+    {
+        if (!$match || !str_starts_with($match, '@')) {
+            return null;
+        }
+
+        return ltrim($match, '@');
     }
 
     private function isRemoteCommunity(?string $domain): bool

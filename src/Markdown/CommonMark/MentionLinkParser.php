@@ -31,7 +31,7 @@ class MentionLinkParser implements InlineParserInterface
     public function getMatchDefinition(): InlineParserMatch
     {
         // support for unicode international domains
-        return InlineParserMatch::regex('\B@([a-zA-Z0-9\-\_]{1,30})(?:@)?((?:[\pL\pN\pS\pM\-\_]++\.)+[\pL\pN\pM]++|[a-z0-9\-\_]++)?');
+        return InlineParserMatch::regex('\B@([\w\-\.]+)(@(?:[\pL\pN\pS\pM\-\_]++\.)+[a-z0-9\-\_]++|[\pL\pN\pM]++)?');
     }
 
     public function parse(InlineParserContext $ctx): bool
@@ -41,7 +41,7 @@ class MentionLinkParser implements InlineParserInterface
 
         $matches = $ctx->getSubMatches();
         $username = $matches['0'];
-        $domain = $matches['1'] ?? $this->settingsManager->get('KBIN_DOMAIN');
+        $domain = $this->extractDomain($matches['1']) ?? $this->settingsManager->get('KBIN_DOMAIN');
 
         $fullUsername = $username.'@'.$domain;
 
@@ -82,6 +82,15 @@ class MentionLinkParser implements InlineParserInterface
         );
 
         return true;
+    }
+
+    private function extractDomain(?string $match): ?string
+    {
+        if (!$match || !str_starts_with($match, '@')) {
+            return null;
+        }
+
+        return ltrim($match, '@');
     }
 
     private function generateNode(string $route, string $param, string $slug, string $label, string $title, string $kbinUsername, MentionType $type): Node

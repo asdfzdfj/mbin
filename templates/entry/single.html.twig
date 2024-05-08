@@ -39,7 +39,7 @@
         {% include 'entry/comment/_options.html.twig' %}
         {% include('user/_visibility_info.html.twig') %}
 
-        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position == constant('App\\Controller\\User\\ThemeSettingsController::TOP')) %}
+        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position is same as theme_setting_constant('TOP')) %}
             <div id="comment-add" class="section">
                 {% include 'entry/comment/_form_comment.html.twig' %}
             </div>
@@ -49,7 +49,7 @@
             {% include 'entry/comment/_list.html.twig' %}
         </div>
 
-        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position == constant('App\\Controller\\User\\ThemeSettingsController::BOTTOM'))  %}
+        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position is same as theme_setting_constant('BOTTOM'))  %}
             <div id="comment-add" class="section">
                 {% include 'entry/comment/_form_comment.html.twig' %}
             </div>

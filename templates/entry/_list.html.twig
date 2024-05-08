@@ -1,11 +1,7 @@
-{%- set V_TRUE = constant('App\\Controller\\User\\ThemeSettingsController::TRUE') -%}
-{%- set V_FALSE = constant('App\\Controller\\User\\ThemeSettingsController::FALSE') -%}
-
-{%- set DYNAMIC_LISTS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_DYNAMIC_LISTS'), V_FALSE) -%}
-{%- set INFINITE_SCROLL = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_INFINITE_SCROLL'), V_FALSE) -%}
-
 <div data-controller="subject-list"
-     data-action="{{- DYNAMIC_LISTS is same as V_TRUE ? 'notifications:EntryCreatedNotification@window->subject-list#addMainSubject' : 'notifications:EntryCreatedNotification@window->subject-list#increaseCounter' -}}">
+     data-action="{{- theme_setting_is('KBIN_GENERAL_DYNAMIC_LISTS', 'TRUE')
+        ? 'notifications:EntryCreatedNotification@window->subject-list#addMainSubject'
+        : 'notifications:EntryCreatedNotification@window->subject-list#increaseCounter' -}}">
     {% for entry in entries %}
         {{ component('entry', {
             entry: entry,
@@ -13,7 +9,7 @@
         }) }}
     {% endfor %}
     {% if(entries.haveToPaginate is defined and entries.haveToPaginate) %}
-        {% if INFINITE_SCROLL is same as V_TRUE %}
+        {% if theme_setting_is('KBIN_GENERAL_INFINITE_SCROLL', 'TRUE') %}
             <div data-controller="infinite-scroll" class="infinite-scroll">
                 {{ component('loader', {'data-infinite-scroll-target': 'loader'}) }}
                 <div data-infinite-scroll-target="pagination" class="visually-hidden">

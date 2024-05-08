@@ -1,26 +1,6 @@
-{%- set V_TRUE = theme_setting_constant('TRUE') -%}
-{%- set V_FALSE = theme_setting_constant('FALSE') -%}
-{%- set V_LEFT = theme_setting_constant('LEFT') -%}
-{%- set V_RIGHT = theme_setting_constant('RIGHT') -%}
-{%- set V_FIXED = theme_setting_constant('FIXED') -%}
-{%- set V_LAST_ACTIVE = theme_setting_constant('LAST_ACTIVE') -%}
-
-{%- set FONT_SIZE = theme_setting_value('KBIN_FONT_SIZE', '100') -%}
-{%- set THEME = theme_setting_value('KBIN_THEME', mbin_default_theme()) -%}
-{%- set PAGE_WIDTH = theme_setting_value('KBIN_PAGE_WIDTH', V_FIXED) -%}
-{%- set ROUNDED_EDGES = theme_setting_value('KBIN_GENERAL_ROUNDED_EDGES', V_TRUE) -%}
-{%- set TOPBAR = theme_setting_value('KBIN_GENERAL_TOPBAR', V_FALSE) -%}
-{%- set FIXED_NAVBAR = theme_setting_value('KBIN_GENERAL_FIXED_NAVBAR', V_FALSE) -%}
-{%- set SIDEBAR_POSITION = theme_setting_value('KBIN_GENERAL_SIDEBAR_POSITION', V_RIGHT) -%}
-{%- set COMPACT = theme_setting_value('KBIN_ENTRIES_COMPACT', V_FALSE) -%}
-
-{%- set SUBSCRIPTIONS_SHOW = theme_setting_value('KBIN_SUBSCRIPTIONS_SHOW', V_TRUE) -%}
-{%- set SUBSCRIPTIONS_SEPARATE = theme_setting_value('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', V_FALSE) -%}
-{%- set SUBSCRIPTIONS_SAME_SIDE = theme_setting_value('KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE', V_FALSE) -%}
-{%- set SUBSCRIPTIONS_SORT = theme_setting_value('KBIN_SUBSCRIPTIONS_SORT', V_LAST_ACTIVE) -%}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}"
-      style="font-size: {{ FONT_SIZE~'%' }}">
+      style="font-size: {{ theme_setting_get('KBIN_FONT_SIZE')~'%' }}">
 <head>
     <meta charset="UTF-8">
     <title>{%- block title -%}{{ kbin_meta_title() }}{%- endblock -%}</title>
@@ -53,13 +33,17 @@
         {{ encore_entry_script_tags('app') }}
     {% endblock %}
 </head>
-<body class="{{ html_classes('theme--'~THEME, {
-        'rounded-edges': ROUNDED_EDGES is same as V_TRUE,
-        'topbar': TOPBAR is same as V_TRUE,
-        'fixed-navbar': FIXED_NAVBAR is same as V_TRUE,
-        'sidebar-left': SIDEBAR_POSITION is same as V_LEFT,
-        'subs-show': app.user is defined and app.user is not same as null and SUBSCRIPTIONS_SHOW is not same as V_FALSE and SUBSCRIPTIONS_SEPARATE is same as V_TRUE,
-        'sidebars-same-side': app.user is defined and app.user is not same as null and SUBSCRIPTIONS_SEPARATE is same as V_TRUE and SUBSCRIPTIONS_SAME_SIDE is same as V_TRUE,
+<body class="{{ html_classes('theme--'~theme_setting_get('KBIN_THEME'), {
+        'rounded-edges': theme_setting_is('KBIN_GENERAL_ROUNDED_EDGES', 'TRUE'),
+        'topbar': theme_setting_is('KBIN_GENERAL_TOPBAR', 'TRUE'),
+        'fixed-navbar': theme_setting_is('KBIN_GENERAL_FIXED_NAVBAR', 'TRUE'),
+        'sidebar-left': theme_setting_is('KBIN_GENERAL_SIDEBAR_POSITION', 'LEFT'),
+        'subs-show': app.user is defined and app.user is not same as null
+            and theme_setting_is('KBIN_SUBSCRIPTIONS_SHOW', 'TRUE')
+            and theme_setting_is('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', 'TRUE'),
+        'sidebars-same-side': app.user is defined and app.user is not same as null
+            and theme_setting_is('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', 'TRUE')
+            and theme_setting_is('KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE', 'TRUE'),
     }) }}"
         data-controller="kbin notifications"
         data-notifications-endpoint-value="{{ kbin_mercure_enabled() ? 'https://'~kbin_domain()~'/.well-known/mercure' : null }}"
@@ -71,10 +55,10 @@
 {% include 'layout/_header.html.twig' with {header_nav: block('header_nav')} %}
 {{ component('announcement') }}
 <div id="middle" class="{%- block mainClass -%}page{%- endblock %}">
-    <div class="kbin-container {{ html_classes('width--'~PAGE_WIDTH) }}">
+    <div class="{{ html_classes('kbin-container', 'width--'~theme_setting_get('KBIN_PAGE_WIDTH')) }}">
         <main id="main"
               data-controller="lightbox timeago confirmation"
-              class="{{ html_classes({'view-compact': COMPACT is same as V_TRUE}) }}">
+              class="{{ html_classes({'view-compact': theme_setting_is('KBIN_ENTRIES_COMPACT', 'TRUE')}) }}">
             {% block body %}{% endblock %}
         </main>
         {% if not mbin_private_instance() or (mbin_private_instance() and app.user is defined and app.user is not same as null) %}
@@ -84,11 +68,11 @@
                 {% endblock %}
             </aside>
         {% endif %}
-        {% if app.user is defined and app.user is not same as null and
-            SUBSCRIPTIONS_SHOW is not same as V_FALSE and
-            SUBSCRIPTIONS_SEPARATE is same as V_TRUE
+        {% if app.user is defined and app.user is not same as null
+            and theme_setting_is('KBIN_SUBSCRIPTIONS_SHOW', 'TRUE')
+            and theme_setting_is('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', 'TRUE')
         %}
-            {{ component('sidebar_subscriptions', { openMagazine: magazine is defined ? magazine : null, user: app.user, sort: SUBSCRIPTIONS_SORT }) }}
+            {{ component('sidebar_subscriptions', { openMagazine: magazine is defined ? magazine : null, user: app.user, sort: theme_setting_get('KBIN_SUBSCRIPTIONS_SORT') }) }}
         {% endif %}
     </div>
 </div>

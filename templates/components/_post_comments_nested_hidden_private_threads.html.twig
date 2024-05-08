@@ -1,4 +1,4 @@
-{% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW')) is same as constant('App\\Controller\\User\\ThemeSettingsController::CLASSIC') %}
+{% if theme_setting_is('POST_COMMENTS_VIEW', 'CLASSIC') %}
     {% for reply in comment.nested %}
         {% if reply.visibility is same as 'private' %}
             {% if app.user and reply.user.isFollower(app.user) %}

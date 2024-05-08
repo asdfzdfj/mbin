@@ -1,11 +1,3 @@
-{%- set V_TRUE = constant('App\\Controller\\User\\ThemeSettingsController::TRUE') -%}
-{%- set V_FALSE = constant('App\\Controller\\User\\ThemeSettingsController::FALSE') -%}
-{%- set V_TREE = constant('App\\Controller\\User\\ThemeSettingsController::TREE') -%}
-
-{%- set SHOW_PREVIEW = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_SHOW_PREVIEW'), V_FALSE) -%}
-{%- set DYNAMIC_LISTS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_DYNAMIC_LISTS'), V_FALSE) -%}
-{%- set VIEW_STYLE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::ENTRY_COMMENTS_VIEW'), V_TREE) -%}
-
 {% if not app.user or (app.user and not app.user.isBlocked(comment.user)) %}
     {% if comment.visibility is same as 'private' and (not app.user or not app.user.isFollower(comment.user)) %}
         <div class="section section--small {{ 'comment-level--' ~ this.getLevel() }}">
@@ -16,13 +8,13 @@
             class: html_classes('section comment entry-comment subject', 'comment-level--' ~ this.getLevel(), {
                 'own': app.user and comment.isAuthor(app.user),
                 'author': comment.isAuthor(comment.entry.user),
-                'show-preview': SHOW_PREVIEW is same as V_TRUE and not comment.isAdult,
+                'show-preview': theme_setting_is('KBIN_ENTRIES_SHOW_PREVIEW', 'TRUE') and not comment.isAdult,
             })}).without('id') }}
                 id="entry-comment-{{ comment.id }}"
                 data-controller="comment subject mentions comment-collapse"
                 data-comment-collapse-depth-value="{{ level }}"
                 data-subject-parent-value="{{ comment.parent ? comment.parent.id : '' }}"
-                data-action="{{- DYNAMIC_LISTS is same as V_TRUE ? 'notifications:Notification@window->subject#notification' : '' -}}">
+                data-action="{{- theme_setting_is('KBIN_GENERAL_DYNAMIC_LISTS', 'TRUE') ? 'notifications:Notification@window->subject#notification' : '' -}}">
             <header>
                 {% if comment.isAdult %}<span class="badge danger">18+</span>{% endif %}
                 {{ component('user_inline', {user: comment.user, showAvatar: false}) }}
@@ -144,7 +136,7 @@
             comment: comment,
             level: level,
             showNested: true,
-            view: VIEW_STYLE
+            view: theme_setting_get('ENTRY_COMMENTS_VIEW')
         }) }}
     {% endif %}
 {% endif %}

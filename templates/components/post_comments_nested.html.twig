@@ -1,4 +1,4 @@
-{% if view is same as constant('App\\Controller\\User\\ThemeSettingsController::CLASSIC') %}
+{% if view is same as theme_setting_constant('CLASSIC') %}
     {% for reply in comment.nested %}
         {{ component('post_comment', {
             comment: reply,

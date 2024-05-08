@@ -1,17 +1,9 @@
-{%- set V_TRUE = constant('App\\Controller\\User\\ThemeSettingsController::TRUE') -%}
-{%- set V_FALSE = constant('App\\Controller\\User\\ThemeSettingsController::FALSE') -%}
-
-{%- set SHOW_COMMENT_USER_AVATARS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_COMMENTS_SHOW_USER_AVATAR'), V_TRUE) -%}
-{%- set SHOW_POST_USER_AVATARS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_POSTS_SHOW_USERS_AVATARS'), V_TRUE) -%}
-{%- set DYNAMIC_LISTS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_DYNAMIC_LISTS'), V_FALSE) -%}
-{%- set INFINITE_SCROLL = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_INFINITE_SCROLL'), V_FALSE) -%}
-
 <div data-controller="subject-list"
      class="{{ html_classes({
-         'show-comment-avatar': SHOW_COMMENT_USER_AVATARS is same as V_TRUE,
-         'show-post-avatar': SHOW_POST_USER_AVATARS is same as V_TRUE
+         'show-comment-avatar': theme_setting_is('KBIN_COMMENTS_SHOW_USER_AVATAR', 'TRUE'),
+         'show-post-avatar': theme_setting_is('KBIN_POSTS_SHOW_USERS_AVATARS', 'TRUE')
      }) }}"
-     data-action="{{- DYNAMIC_LISTS is same as V_TRUE ? 'notifications:PostCreatedNotification@window->subject-list#addMainSubject notifications:PostCommentCreatedNotification@window->subject-list#addCommentOverview' : 'notifications:PostCreatedNotification@window->subject-list#increaseCounter' -}}">
+     data-action="{{- theme_setting_is('KBIN_GENERAL_DYNAMIC_LISTS', 'TRUE') ? 'notifications:PostCreatedNotification@window->subject-list#addMainSubject notifications:PostCommentCreatedNotification@window->subject-list#addCommentOverview' : 'notifications:PostCreatedNotification@window->subject-list#increaseCounter' -}}">
     {% for post in posts %}
         {{ component('post', {
             post: post,
@@ -20,7 +12,7 @@
         }) }}
     {% endfor %}
     {% if(posts.haveToPaginate is defined and posts.haveToPaginate) %}
-        {% if INFINITE_SCROLL is same as V_TRUE %}
+        {% if theme_setting_is('KBIN_GENERAL_INFINITE_SCROLL', 'TRUE') %}
             <div data-controller="infinite-scroll" class="infinite-scroll">
                 {{ component('loader', {'data-infinite-scroll-target': 'loader'}) }}
                 <div data-infinite-scroll-target="pagination" class="visually-hidden">

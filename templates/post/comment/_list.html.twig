@@ -1,15 +1,5 @@
-{%- set V_TRUE = constant('App\\Controller\\User\\ThemeSettingsController::TRUE') -%}
-{%- set V_FALSE = constant('App\\Controller\\User\\ThemeSettingsController::FALSE') -%}
-{%- set V_CHAT = constant('App\\Controller\\User\\ThemeSettingsController::CHAT') -%}
-{%- set V_TREE = constant('App\\Controller\\User\\ThemeSettingsController::TREE') -%}
-
-{%- set SHOW_COMMENT_USER_AVATARS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_COMMENTS_SHOW_USER_AVATAR'), V_TRUE) -%}
-{%- set SHOW_POST_USER_AVATARS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_POSTS_SHOW_USERS_AVATARS'), V_TRUE) -%}
-{%- set DYNAMIC_LISTS = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_DYNAMIC_LISTS'), V_FALSE) -%}
-{%- set VIEW_STYLE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::POST_COMMENTS_VIEW'), V_TREE) -%}
-
 {% if showNested is not defined %}
-    {% if VIEW_STYLE is same as V_CHAT %}
+    {% if theme_setting_is('POST_COMMENTS_VIEW', 'CHAT') %}
         {% set showNested = false %}
     {% else %}
         {% set showNested = true %}
@@ -21,12 +11,12 @@
 {% set autoAction = is_route_name('post_single') ? 'notifications:PostCommentCreatedNotification@window->subject-list#addComment' : 'notifications:PostCommentCreatedNotification@window->subject-list#addCommentOverview' %}
 {% set manualAction = is_route_name('post_single') ? 'notifications:PostCommentCreatedNotification@scroll-top#increaseCounter' : 'notifications:PostCommentCreatedNotification@window->scroll_top#increaseCounter' %}
 <div class="{{ html_classes('comments post-comments comments-tree', {
-         'show-comment-avatar': SHOW_COMMENT_USER_AVATARS is same as V_TRUE,
-         'show-post-avatar': SHOW_POST_USER_AVATARS is same as V_TRUE },
-         'comments-view-style--'~VIEW_STYLE
+         'show-comment-avatar': theme_setting_is('KBIN_COMMENTS_SHOW_USER_AVATAR', 'TRUE'),
+         'show-post-avatar': theme_setting_is('KBIN_POSTS_SHOW_USERS_AVATARS', 'TRUE') },
+         'comments-view-style--'~theme_setting_get('POST_COMMENTS_VIEW')
      ) }}"
      data-controller="subject-list"
-     data-action="{{- DYNAMIC_LISTS is same as V_TRUE ? autoAction : manualAction -}}">
+     data-action="{{- theme_setting_is('KBIN_GENERAL_DYNAMIC_LISTS', 'TRUE') ? autoAction : manualAction -}}">
     {% for comment in comments|sort_author_first(post) %}
         {{ component('post_comment', {
             comment: comment,
@@ -42,7 +32,7 @@
         <aside class="section section--muted">
             <p>{{ 'no_comments'|trans }}</p>
         </aside>
-    {% elseif VIEW_STYLE is same as V_TREE %}
+    {% elseif theme_setting_is('POST_COMMENTS_VIEW', 'TREE') %}
         <div class="comment-line--2"></div>
         <div class="comment-line--3"></div>
         <div class="comment-line--4"></div>

@@ -248,14 +248,14 @@
             </button>
             <ul class="dropdown__menu">
                 <li>
-                    <a class="{{ html_classes({'active': not app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT')) or app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT')) is same as 'false'}) }}"
-                       href="{{ path('theme_settings', {key: constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT'), value: 'false'}) }}">
+                    <a class="{{ html_classes({'active': theme_setting_is('KBIN_ENTRIES_COMPACT', 'FALSE')}) }}"
+                       href="{{ path('theme_settings', {key: theme_setting_constant('KBIN_ENTRIES_COMPACT'), value: theme_setting_constant('FALSE')}) }}">
                         {{ 'classic_view'|trans }}
                     </a>
                 </li>
                 <li>
-                    <a class="{{ html_classes({'active': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT')) is same as 'true'}) }}"
-                       href="{{ path('theme_settings', {key: constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT'), value: 'true'}) }}">
+                    <a class="{{ html_classes({'active': theme_setting_is('KBIN_ENTRIES_COMPACT', 'TRUE')}) }}"
+                       href="{{ path('theme_settings', {key: theme_setting_constant('KBIN_ENTRIES_COMPACT'), value: theme_setting_constant('TRUE')}) }}">
                         {{ 'compact_view'|trans }}
                     </a>
                 </li>

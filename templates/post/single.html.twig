@@ -26,8 +26,8 @@
 
 {% block body %}
     <div id="content" class="{{ html_classes({
-        'show-comment-avatar': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_COMMENTS_SHOW_USER_AVATAR')) is same as 'true' or not app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_COMMENTS_SHOW_USER_AVATAR')),
-        'show-post-avatar': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_POSTS_SHOW_USERS_AVATARS')) is same as 'true' or not app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_POSTS_SHOW_USERS_AVATARS'))
+        'show-comment-avatar': theme_setting_is('KBIN_COMMENTS_SHOW_USER_AVATAR', 'TRUE'),
+        'show-post-avatar': theme_setting_is('KBIN_POSTS_SHOW_USERS_AVATARS', 'TRUE')
     }) }}">
         {{ component('post', {
             post: post,
@@ -38,7 +38,7 @@
         {% include 'post/comment/_options.html.twig' %}
         {% include 'layout/_flash.html.twig' %}
 
-        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position == constant('App\\Controller\\User\\ThemeSettingsController::TOP')) %}
+        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position is same as theme_setting_constant('TOP')) %}
             <div id="comment-add" class="section">
                 {% include 'post/comment/_form_comment.html.twig' %}
             </div>
@@ -48,7 +48,7 @@
             {% include 'post/comment/_list.html.twig' %}
         </div>
 
-        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position == constant('App\\Controller\\User\\ThemeSettingsController::BOTTOM')) %}
+        {% if user is defined and user and user.visibility is same as 'visible' and (user_settings.comment_reply_position is same as theme_setting_constant('BOTTOM')) %}
             <div id="comment-add" class="section">
                 {% include 'post/comment/_form_comment.html.twig' %}
             </div>

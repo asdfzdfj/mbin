@@ -1,40 +1,29 @@
-{% with %}
-{% set KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR = constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR') %}
-{% set KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE = constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE') %}
-{% set KBIN_GENERAL_SIDEBAR_POSITION = constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_SIDEBAR_POSITION') %}
-{% set KBIN_SUBSCRIPTIONS_LARGE_PANEL = constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_LARGE_PANEL') %}
-{% set KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON = constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON') %}
-{# for whatever reason doing {% set TRUE = ... %} would crash #}
-{% set V_TRUE = constant('App\\Controller\\User\\ThemeSettingsController::TRUE') %}
-{% set V_FALSE = constant('App\\Controller\\User\\ThemeSettingsController::FALSE') %}
-{% set V_LEFT = constant('App\\Controller\\User\\ThemeSettingsController::LEFT') %}
-<aside class="{{ html_classes('sidebar-subscriptions', { 'inline': app.request.cookies.get(KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR) is not same as V_TRUE }) }}">
+<aside class="{{ html_classes('sidebar-subscriptions', { 'inline': not theme_setting_is('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', 'TRUE') }) }}">
     <section
-        class="{{ html_classes('section', app.request.cookies.get(KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR) is not same as V_TRUE ? 'inline' : 'section--top') }}"
+        class="{{ html_classes('section', not theme_setting_is('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', 'TRUE') ? 'inline' : 'section--top') }}"
         data-controller="subs-panel"
-        data-subs-panel-sidebar-position-value="{{ app.request.cookies.get(KBIN_GENERAL_SIDEBAR_POSITION) }}"
+        data-subs-panel-sidebar-position-value="{{ theme_setting_get('KBIN_GENERAL_SIDEBAR_POSITION') }}"
     >
         <h3>
             {{ 'subscription_header'|trans }}
             <span class="sidebar-subscriptions-icons">
-                {% if app.request.cookies.get(KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR) is same as V_TRUE %}
+                {% if theme_setting_is('KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR', 'TRUE') %}
                     <a href="#"
                         style="margin-right: .5em;"
                         title="{{ 'subscription_sidebar_pop_in'|trans }}"
                         aria-label="{{ 'subscription_sidebar_pop_in'|trans }}"
                         data-action="subs-panel#reattach"
                     >
-                        {% if app.request.cookies.get(KBIN_GENERAL_SIDEBAR_POSITION) is same as V_LEFT
-                                and app.request.cookies.get(KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE) is same as V_TRUE
-                            or app.request.cookies.get(KBIN_GENERAL_SIDEBAR_POSITION) is not same as V_LEFT
-                                and app.request.cookies.get(KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE) is not same as V_TRUE %}
+                        {% if theme_setting_is('KBIN_GENERAL_SIDEBAR_POSITION', 'LEFT')
+                                and theme_setting_is('KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE', 'TRUE')
+                            or not theme_setting_is('KBIN_GENERAL_SIDEBAR_POSITION', 'LEFT')
+                                and not theme_setting_is('KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE', 'TRUE') %}
                             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                         {% else %}
                             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                         {% endif %}
                     </a>
-                {% endif %}
-                {% if app.request.cookies.get(KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR) is not same as V_TRUE %}
+                {% else %}
                     <a href="#"
                         title="{{ 'subscription_sidebar_pop_out_left'|trans }}"
                         aria-label="{{ 'subscription_sidebar_pop_out_left'|trans }}"
@@ -53,7 +42,7 @@
             </span>
         </h3>
         <div>
-            <ul class="{{ html_classes('subscription-list', 'meta', { 'lg': app.request.cookies.get(KBIN_SUBSCRIPTIONS_LARGE_PANEL) is same as V_TRUE }) }}">
+            <ul class="{{ html_classes('subscription-list', 'meta', { 'lg': theme_setting_is('KBIN_SUBSCRIPTIONS_LARGE_PANEL', 'TRUE') }) }}">
                 {% for magazine in magazines %}
                     <li class="{{ html_classes('subscription', { 'active': openMagazine and openMagazine.name is same as magazine.name }) }}">
                         <a class="stretched-link" href="{{ path('front_magazine', {name: magazine.name}) }}">
@@ -62,12 +51,12 @@
                                 <img loading="lazy"
                                     src="{{ magazine.icon.filePath ? (asset(magazine.icon.filePath)|imagine_filter('avatar_thumb')) : magazine.icon.sourceUrl }}"
                                     alt="{{ magazine.name }}'s icon"
-                                    class="{{ html_classes('image-inline', 'magazine-subscription-avatar', { 'onlyMobile': app.request.cookies.get(KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON) is same as V_FALSE }) }}" />
+                                    class="{{ html_classes('image-inline', 'magazine-subscription-avatar', { 'onlyMobile': theme_setting_is('KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON', 'FALSE') }) }}" />
                             {% else %}
-                                <span class="{{ html_classes('magazine-subscription-avatar-placeholder', { 'onlyMobile': app.request.cookies.get(KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON) is same as V_FALSE }) }}"></span>
+                                <span class="{{ html_classes('magazine-subscription-avatar-placeholder', { 'onlyMobile': theme_setting_is('KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON', 'FALSE') }) }}"></span>
                             {% endif %}
 
-                            <span class="{{ html_classes('magazine-name', { 'has-image': magazine.icon, 'onlyMobile': app.request.cookies.get(KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON) is same as V_FALSE }) }}">
+                            <span class="{{ html_classes('magazine-name', { 'has-image': magazine.icon, 'onlyMobile': theme_setting_is('KBIN_SUBSCRIPTIONS_SHOW_MAGAZINE_ICON', 'FALSE') }) }}">
                                 {{ magazine.title ?? magazine.name }}
                             </span>
                         </a>
@@ -86,4 +75,3 @@
         </div>
     </section>
 </aside>
-{% endwith %}

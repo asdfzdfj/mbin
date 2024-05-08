@@ -1,6 +1,6 @@
 <div class="settings">
-    {% set theme = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_THEME')) %}
-    {% set theme_key = constant('App\\Controller\\User\\ThemeSettingsController::KBIN_THEME') %}
+    {% set theme = theme_setting_get('KBIN_THEME') %}
+    {% set theme_key = theme_setting_constant('KBIN_THEME') %}
     <a href="{{ path('theme_settings', {key: theme_key, value: 'kbin'}) }}"
        title="{{ 'kbin' }} {{ 'theme'|trans }}"
        aria-label="{{ 'kbin' }} {{ 'theme'|trans }}"

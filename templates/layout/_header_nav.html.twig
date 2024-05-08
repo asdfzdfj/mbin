@@ -33,7 +33,7 @@
             {{ 'people'|trans }}
         </a>
     </li>
-    {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_TOPBAR')) is not same as 'true' %}
+    {% if not theme_setting_is('KBIN_GENERAL_TOPBAR', 'TRUE') %}
         <li>
             <a href="{{ path('magazine_list_all') }}"
                class="{{ html_classes({'active': activeLink == 'magazines'}) }}">

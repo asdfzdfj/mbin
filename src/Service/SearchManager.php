@@ -10,11 +10,13 @@ use App\Message\ActivityPub\Inbox\ActivityMessage;
 use App\Repository\DomainRepository;
 use App\Repository\MagazineRepository;
 use App\Repository\SearchRepository;
+use App\Repository\UserRepository;
 use App\Service\ActivityPub\ApHttpClient;
 use App\Utils\RegPatterns;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\PagerfantaInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class SearchManager
@@ -22,11 +24,13 @@ class SearchManager
     public function __construct(
         private readonly SearchRepository $repository,
         private readonly MagazineRepository $magazineRepository,
+        private readonly UserRepository $userRepository,
         private readonly DomainRepository $domainRepository,
         private readonly ActivityPubManager $activityPubManager,
         private readonly MessageBusInterface $bus,
         private readonly ApHttpClient $apHttpClient,
         private readonly SettingsManager $settingsManager,
+        private readonly LoggerInterface $logger,
     ) {
     }
 

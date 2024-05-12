@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\ActivityPub;
 
 use App\Service\ActivityPubManager;
+use App\Utils\ArrayTool;
 
 class ApObjectExtractor
 {
@@ -14,6 +15,24 @@ class ApObjectExtractor
         private readonly MarkdownConverter $markdownConverter,
         private readonly ActivityPubManager $activityPubManager,
     ) {
+    }
+
+    /**
+     * get id url from specified field in object.
+     *
+     * the key may contain an embedded data array, which as 'id' key, or it could already be a link to said object
+     */
+    public static function getLinkedObjectId(array $object, string $key, string $idKey = 'id'): ?string
+    {
+        $target = $object[$key] ?? null;
+
+        return match (true) {
+            // 'id' field should not have any embedded data
+            $idKey === $key => $target,
+            \is_string($target) => $target,
+            ArrayTool::isMap($target) => $target[$idKey] ?? null,
+            default => null,
+        };
     }
 
     public function getMarkdownBody(array $object): ?string

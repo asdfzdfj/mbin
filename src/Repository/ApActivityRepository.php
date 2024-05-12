@@ -29,7 +29,7 @@ class ApActivityRepository extends ServiceEntityRepository
         parent::__construct($registry, ApActivity::class);
     }
 
-    /** @return array{id: int, type: string} */
+    /** @return ?array{id: int, type: string} */
     #[ArrayShape(['id' => 'int', 'type' => 'string'])]
     public function findByObjectId(string $apId): ?array
     {
@@ -66,7 +66,7 @@ class ApActivityRepository extends ServiceEntityRepository
         return null;
     }
 
-    /** @return array{id: int, type: string} */
+    /** @return ?array{id: int, type: string} */
     #[ArrayShape(['id' => 'int', 'type' => 'string'])]
     private function findLocalByApId(string $apId): ?array
     {

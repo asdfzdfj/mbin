@@ -3,3 +3,9 @@ search:
   defaults: { val: ~, }
   path: /search
   methods: [GET]
+
+search_lookup:
+  controller: App\Controller\LookupController
+  defaults: { val: ~ }
+  path: /lookup
+  methods: [GET]

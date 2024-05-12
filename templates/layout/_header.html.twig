@@ -26,6 +26,14 @@
         </nav>
         <menu>
             <li>
+                <a href="{{ path('search_lookup') }}"
+                   class="icon"
+                   aria-label="{{ 'lookup'|trans }}"
+                   title="{{ 'lookup'|trans }}">
+                    <i class="fa-solid fa-glasses" aria-hidden="true"></i>
+                </a>
+            </li>
+            <li>
                 <a href="{{ path('search') }}"
                    class="icon"
                    aria-label="{{ 'search'|trans }}"

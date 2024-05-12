@@ -29,10 +29,8 @@ class ApActivityRepository extends ServiceEntityRepository
         parent::__construct($registry, ApActivity::class);
     }
 
-    #[ArrayShape([
-        'id' => 'int',
-        'type' => 'string',
-    ])]
+    /** @return array{id: int, type: string} */
+    #[ArrayShape(['id' => 'int', 'type' => 'string'])]
     public function findByObjectId(string $apId): ?array
     {
         $local = $this->findLocalByApId($apId);
@@ -68,10 +66,8 @@ class ApActivityRepository extends ServiceEntityRepository
         return null;
     }
 
-    #[ArrayShape([
-        'id' => 'int',
-        'type' => 'string',
-    ])]
+    /** @return array{id: int, type: string} */
+    #[ArrayShape(['id' => 'int', 'type' => 'string'])]
     private function findLocalByApId(string $apId): ?array
     {
         $parsed = parse_url($apId);
@@ -96,5 +92,20 @@ class ApActivityRepository extends ServiceEntityRepository
         }
 
         return null;
+    }
+
+    /**
+     * @param ?array{id: int, type: string} $entityInfo array result from self::findByObjectId()
+     */
+    public function resolve(?array $entityInfo): null|Entry|Post|EntryComment|PostComment
+    {
+        if (!$entityInfo) {
+            return null;
+        }
+
+        return $this
+            ->getEntityManager()
+            ->getRepository($entityInfo['type'])
+            ->find((int) $entityInfo['id']);
     }
 }

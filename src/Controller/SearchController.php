@@ -85,8 +85,7 @@ class SearchController extends AbstractController
 
     private function federatedSearchAllowed(): bool
     {
-        return !$this->settingsManager->get('KBIN_FEDERATED_SEARCH_ONLY_LOGGEDIN')
-            || $this->getUser();
+        return $this->manager->isFederateSearchAllowed($this->getUser());
     }
 
     private function lookupHandle(ActorHandle $handle): array

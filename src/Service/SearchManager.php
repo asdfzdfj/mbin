@@ -26,6 +26,7 @@ class SearchManager
         private readonly ActivityPubManager $activityPubManager,
         private readonly MessageBusInterface $bus,
         private readonly ApHttpClient $apHttpClient,
+        private readonly SettingsManager $settingsManager,
     ) {
     }
 
@@ -63,9 +64,11 @@ class SearchManager
     }
 
     /**
-     * @param string $query One or more canonical ActivityPub usernames, such as kbinMeta@kbin.social or @ernest@kbin.social (anything that matches RegPatterns::AP_USER)
+     * @param string $query One or more canonical ActivityPub usernames, such as kbinMeta@kbin.social
+     *                      or @ernest@kbin.social (anything that matches RegPatterns::AP_USER)
      *
-     * @return array a list of magazines or users that were found using the given identifiers, empty if none were found or no @ is in the query
+     * @return array a list of magazines or users that were found using the given identifiers,
+     *               empty if none were found or no @ is in the query
      */
     public function findActivityPubActorsByUsername(string $query): array
     {
@@ -82,16 +85,15 @@ class SearchManager
                 foreach ($webfinger->getProfileIds() as $profileId) {
                     $object = $this->activityPubManager->findActorOrCreate($profileId);
                     if (!empty($object)) {
-                        if ($object instanceof Magazine) {
-                            $type = 'magazine';
-                        } elseif ($object instanceof User) {
-                            $type = 'user';
-                        }
+                        $type = match (\get_class($object)) {
+                            User::class => 'user',
+                            Magazine::class => 'magazine',
+                            default => null,
+                        };
 
-                        $objects[] = [
-                            'type' => $type,
-                            'object' => $object,
-                        ];
+                        if ($type) {
+                            $objects[] = ['type' => $type, 'object' => $object];
+                        }
                     }
                 }
             } catch (\Exception $e) {
@@ -121,5 +123,11 @@ class SearchManager
         }
 
         return $objects ?? [];
+    }
+
+    public function isFederateSearchAllowed(?User $user): bool
+    {
+        return !$this->settingsManager->get('KBIN_FEDERATED_SEARCH_ONLY_LOGGEDIN')
+            || null !== $user;
     }
 }

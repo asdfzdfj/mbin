@@ -18,15 +18,32 @@ class ActorHandleTest extends TestCase
     }
 
     /**
+     * @dataProvider invalidHandleProvider()
+     */
+    public function testBareWordIsNotHandle(string $input, ?array $output): void
+    {
+        $this->assertNull(ActorHandle::parse($input));
+    }
+
+    /**
      * @dataProvider handleProvider()
      */
     public function testHandleIsParsedProperly(string $input, array $output): void
     {
         $handle = ActorHandle::parse($input);
-        $this->assertEquals($handle->prefix, $output['prefix']);
-        $this->assertEquals($handle->name, $output['name']);
-        $this->assertEquals($handle->host, $output['host']);
-        $this->assertEquals($handle->port, $output['port']);
+        $this->assertEquals($output['prefix'], $handle->prefix);
+        $this->assertEquals($output['name'], $handle->name);
+        $this->assertEquals($output['host'], $handle->host);
+        $this->assertEquals($output['port'], $handle->port);
+    }
+
+    /**
+     * @dataProvider handleProvider()
+     */
+    public function testReconstructedHandleIsSameAsInput(string $input, array $output): void
+    {
+        $handle = ActorHandle::parse($input);
+        $this->assertEquals($input, (string) $handle);
     }
 
     public static function handleProvider(): array
@@ -56,10 +73,36 @@ class ActorHandleTest extends TestCase
                 'host' => 'pink.brainrot.internal',
                 'port' => 11037,
             ],
+            '@localuser' => [
+                'prefix' => '@',
+                'name' => 'localuser',
+                'host' => null,
+                'port' => null,
+            ],
+            '!not-lemmy-group' => [
+                'prefix' => '!',
+                'name' => 'not-lemmy-group',
+                'host' => null,
+                'port' => null,
+            ],
         ];
 
-        $inputs = array_keys($handleSamples);
-        $outputs = array_values($handleSamples);
+        return self::testdoxFormatter($handleSamples);
+    }
+
+    public static function invalidHandleProvider(): array
+    {
+        $handleSamples = [
+            'bareword_handle' => null,
+        ];
+
+        return self::testdoxFormatter($handleSamples);
+    }
+
+    private static function testdoxFormatter(array $sample): array
+    {
+        $inputs = array_keys($sample);
+        $outputs = array_values($sample);
 
         return array_combine(
             $inputs,

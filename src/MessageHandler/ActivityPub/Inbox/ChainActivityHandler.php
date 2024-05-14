@@ -44,7 +44,10 @@ class ChainActivityHandler
         $validObjectTypes = ['Page', 'Note', 'Article', 'Question'];
         $object = $message->chain[0];
         if (!\in_array($object['type'], $validObjectTypes)) {
-            $this->logger->error('cannot get the dependencies of the object, its type {t} is not one we can handle. {m]', ['t' => $object['type'], 'm' => $message]);
+            $this->logger->error(
+                'cannot get the dependencies of the object, its type {type} is not one we can handle',
+                ['type' => $object['type'], 'message' => $message]
+            );
 
             return;
         }
@@ -52,7 +55,10 @@ class ChainActivityHandler
         $entity = $this->retrieveObject($object['id']);
 
         if (!$entity) {
-            $this->logger->error('could not retrieve all the dependencies of {o}', ['o' => $object]);
+            $this->logger->error(
+                'could not retrieve all the dependencies of {id}',
+                ['id' => $object['id'], 'object' => $object]
+            );
 
             return;
         }
@@ -80,20 +86,28 @@ class ChainActivityHandler
                 return null;
             }
             if (!\is_array($object)) {
-                $this->logger->warning("Didn't get an array for {url}. Got '{val}' instead, exiting", ['url' => $apUrl, 'val' => $object]);
+                $this->logger->warning(
+                    "Didn't get an array for {url}. Got '{val}' instead, exiting",
+                    ['url' => $apUrl, 'val' => $object]
+                );
 
                 return null;
             }
 
-            if (\array_key_exists('inReplyTo', $object) && null !== $object['inReplyTo']) {
+            if (isset($object['inReplyTo']) && null !== $object['inReplyTo']) {
                 $parentUrl = \is_string($object['inReplyTo']) ? $object['inReplyTo'] : $object['inReplyTo']['id'];
-                $meta = $this->repository->findByObjectId($parentUrl);
-                if (!$meta) {
+                $parent = $this->repository->findByObjectId($parentUrl);
+                if (!$parent) {
                     $this->retrieveObject($parentUrl);
                 }
-                $meta = $this->repository->findByObjectId($parentUrl);
-                if (!$meta) {
-                    $this->logger->warning('fetching the parent object ({parent}) did not work for {url}, aborting', ['parent' => $parentUrl, 'url' => $apUrl]);
+
+                // fetch it again to ensure it's persisted
+                $parent = $this->repository->findByObjectId($parentUrl);
+                if (!$parent) {
+                    $this->logger->warning(
+                        'fetching the parent object ({parent}) did not work for {url}, aborting',
+                        ['parent' => $parentUrl, 'url' => $apUrl]
+                    );
 
                     return null;
                 }
@@ -102,23 +116,29 @@ class ChainActivityHandler
             switch ($object['type']) {
                 case 'Question':
                 case 'Note':
-                    $this->logger->debug('creating note {o}', ['o' => $object]);
+                    $this->logger->debug('creating note', ['object' => $object]);
 
                     return $this->note->create($object);
                 case 'Page':
                 case 'Article':
-                    $this->logger->debug('creating page {o}', ['o' => $object]);
+                    $this->logger->debug('creating page', ['object' => $object]);
 
                     return $this->page->create($object);
                 default:
-                    $this->logger->warning('Could not create an object from type {t} on {url}: {o}', ['t' => $object['type'], 'url' => $apUrl, 'o' => $object]);
+                    $this->logger->warning(
+                        'Could not create an object from type {type} on {url}',
+                        ['type' => $object['type'], 'url' => $apUrl, 'object' => $object]
+                    );
             }
         } catch (UserBannedException) {
             $this->logger->error('the user is banned, url: {url}', ['url' => $apUrl]);
         } catch (TagBannedException) {
             $this->logger->error('one of the used tags is banned, url: {url}', ['url' => $apUrl]);
         } catch (\Exception $e) {
-            $this->logger->error('There was an exception while getting {url}: {ex} - {m}. {o}', ['url' => $apUrl, 'ex' => \get_class($e), 'm' => $e->getMessage(), 'o' => $e]);
+            $this->logger->error(
+                'There was an exception while getting {url}: {ex} - {message}',
+                ['url' => $apUrl, 'ex' => \get_class($e), 'message' => $e->getMessage(), 'exception' => $e]
+            );
         }
 
         return null;

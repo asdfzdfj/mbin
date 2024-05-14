@@ -71,10 +71,7 @@ class TagManager
     {
         return array_unique(
             array_filter(
-                array_merge(
-                    $dto->tags ?? [],
-                    $this->tagExtractor->extract($dto->body ?? '') ?? []
-                )
+                $this->tagExtractor->extract($dto->body ?? '') ?? []
             )
         );
     }

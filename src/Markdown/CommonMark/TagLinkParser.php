@@ -25,9 +25,13 @@ class TagLinkParser implements InlineParserInterface
     public function parse(InlineParserContext $ctx): bool
     {
         $cursor = $ctx->getCursor();
-        $cursor->advanceBy($ctx->getFullMatchLength());
 
         [$tag] = $ctx->getSubMatches();
+        if (preg_match('/^\d+$/u', $tag)) {
+            return false;
+        }
+
+        $cursor->advanceBy($ctx->getFullMatchLength());
 
         $url = $this->urlGenerator->generate(
             'tag_overview',

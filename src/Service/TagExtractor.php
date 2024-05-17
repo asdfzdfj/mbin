@@ -39,9 +39,9 @@ class TagExtractor
         $result = $matches[1];
         $result = array_map(fn ($tag) => mb_strtolower(trim($tag)), $result);
 
-        $result = array_values($result);
-
         $result = array_map(fn ($tag) => $this->transliterate($tag), $result);
+
+        $result = array_filter($result, fn ($tag) => !preg_match('/^\d+$/u', $tag));
 
         if ($magazineName) {
             $result = array_diff($result, [$magazineName]);

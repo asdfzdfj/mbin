@@ -29,6 +29,7 @@ class TagExtractorTest extends TestCase
             ['Lorem ipsum', null],
             ['#Test1_2_3', ['test1_2_3']],
             ['#_123_ABC_', ['_123_abc_']],
+            ['we are #1', null],
             ['Teraz #zażółć #gęślą #jaźń', ['zazolc', 'gesla', 'jazn']],
             ['#Göbeklitepe #çarpıcı #eğlence #şarkı #ören', ['gobeklitepe', 'carpici', 'eglence', 'sarki', 'oren']],
             ['#Viva #España #senõr', ['viva', 'espana', 'senor']],

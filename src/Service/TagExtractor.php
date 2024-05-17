@@ -43,6 +43,8 @@ class TagExtractor
 
         $result = array_map(fn ($tag) => $this->transliterate($tag), $result);
 
+        $result = array_filter($result, fn ($tag) => !preg_match('/^\d+$/', $tag));
+
         if ($magazineName) {
             $result = array_diff($result, [$magazineName]);
         }

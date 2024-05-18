@@ -1,5 +1,6 @@
 import { fetch, ok } from '../utils/http';
 import { Controller } from '@hotwired/stimulus';
+import { prepareEmbed } from '../utils/embed_preview'
 import router from '../utils/routing';
 import { useThrottle } from 'stimulus-use';
 
@@ -75,7 +76,7 @@ export default class extends Controller {
 
             const response = await this.fetchEmbed(event.params.url);
 
-            this.containerTarget.innerHTML = response.html;
+            this.containerTarget.innerHTML = prepareEmbed(response.html);
             this.containerTarget.classList.remove('hidden');
             if (event.params.ratio) {
                 this.containerTarget

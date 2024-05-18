@@ -12,6 +12,9 @@ export default class extends Controller {
     static targets = ['container'];
     static throttles = ['show'];
 
+    /** memoization of fetched embed response */
+    fetchedResponse = {};
+
     connect() {
         useThrottle(this, { wait: 1000 });
 
@@ -43,21 +46,34 @@ export default class extends Controller {
         await this.show(event);
     }
 
+    async fetchEmbed(url) {
+        if (this.fetchedResponse[url]) {
+            return this.fetchedResponse[url];
+        }
+
+        let response = await fetch(router().generate('ajax_fetch_embed', { url }), { method: 'GET' });
+
+        response = await ok(response);
+        response = await response.json();
+
+        this.fetchedResponse[url] = response;
+
+        return response;
+    }
+
     async show(event) {
         event.preventDefault();
 
         if (this.containerTarget.hasChildNodes()) {
             this.containerTarget.classList.toggle('hidden');
+            this.containerTarget.replaceChildren();
             return;
         }
 
         try {
             this.loadingValue = true;
 
-            let response = await fetch(router().generate('ajax_fetch_embed', { url: event.params.url }), { method: 'GET' });
-
-            response = await ok(response);
-            response = await response.json();
+            const response = await this.fetchEmbed(event.params.url);
 
             this.containerTarget.innerHTML = response.html;
             this.containerTarget.classList.remove('hidden');

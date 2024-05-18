@@ -63,7 +63,7 @@ class AjaxController extends AbstractController
         // only wrap embed link for image embed as it doesn't make much sense for any other type for embed
         if ($data->isImageUrl()) {
             $html = sprintf(
-                '<a href="%s" class="embed-link">%s</a>',
+                '<a href="%s" class="embed-link" data-controller="embed-lightbox" data-type="image">%s</a>',
                 $data->url,
                 $data->html
             );

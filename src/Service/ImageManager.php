@@ -36,7 +36,7 @@ class ImageManager
 
     public static function isImageUrl(string $url): bool
     {
-        $urlExt = mb_strtolower(pathinfo($url, PATHINFO_EXTENSION));
+        $urlExt = mb_strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
 
         $types = array_map(fn ($type) => str_replace('image/', '', $type), self::IMAGE_MIMETYPES);
 

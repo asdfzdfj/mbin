@@ -859,29 +859,43 @@ class ActivityPubManager
     {
         $object = null;
         $calledUrl = null;
+
         if (\is_string($apObject)) {
             if (false === filter_var($apObject, FILTER_VALIDATE_URL)) {
-                $this->logger->error('The like activity references an object by string, but that is not a URL, discarding the message', $fullPayload);
+                $this->logger->error(
+                    'The like activity references an object by string, but that is not a URL, discarding the message',
+                    $fullPayload
+                );
 
                 return null;
             }
+
             $activity = $this->activityRepository->findByObjectId($apObject);
             $calledUrl = $apObject;
             if (!$activity) {
-                $this->logger->debug('object is fetched from {url} because it is a string and could not be found in our repo', ['url' => $apObject]);
+                $this->logger->debug(
+                    'object is fetched from {url} because it is a string and could not be found in our repo',
+                    ['url' => $apObject]
+                );
                 $object = $this->apHttpClient->getActivityObject($apObject);
             }
         } else {
             $activity = $this->activityRepository->findByObjectId($apObject['id']);
             $calledUrl = $apObject['id'];
             if (!$activity) {
-                $this->logger->debug('object is fetched from {url} because it is not a string and could not be found in our repo', ['url' => $apObject['id']]);
+                $this->logger->debug(
+                    'object is fetched from {url} because it is not a string and could not be found in our repo',
+                    ['url' => $apObject['id']]
+                );
                 $object = $apObject;
             }
         }
 
         if (!$activity && !$object) {
-            $this->logger->error("The activity is still null and we couldn't get the object from the url, discarding", $fullPayload);
+            $this->logger->error(
+                "The activity is still null and we couldn't get the object from the url, discarding",
+                $fullPayload
+            );
 
             return null;
         }
@@ -889,18 +903,94 @@ class ActivityPubManager
         if ($object) {
             $adjustedUrl = null;
             if ($object['id'] !== $calledUrl) {
-                $this->logger->warning('the url {url} returned a different object id: {id}', ['url' => $calledUrl, 'id' => $object['id']]);
+                $this->logger->warning(
+                    'the url {url} returned a different object id: {id}',
+                    ['url' => $calledUrl, 'id' => $object['id']]
+                );
                 $adjustedUrl = $object['id'];
             }
 
-            $this->logger->debug('dispatching a ChainActivityMessage, because the object could not be found: {o}', ['o' => $apObject]);
-            $this->logger->debug('the object for ChainActivityMessage with object {o}', ['o' => $object]);
+            $this->logger->debug(
+                'dispatching a ChainActivityMessage, because the object could not be found',
+                ['o' => $apObject]
+            );
+            $this->logger->debug('the object for ChainActivityMessage with object', ['o' => $object]);
+
             $chainDispatch($object, $adjustedUrl);
 
             return null;
         }
 
         return $this->entityManager->getRepository($activity['type'])->find((int) $activity['id']);
+    }
+
+    public function getEntityObject2(
+        string|array $apObject,
+        array $fullPayload,
+        callable $chainDispatch
+    ): null|Entry|EntryComment|Post|PostComment {
+        $object = null;
+
+        if (\is_string($apObject)) {
+            if (false === filter_var($apObject, FILTER_VALIDATE_URL)) {
+                $this->logger->error(
+                    'supplied apObject referenced by string, but that is not a URL, discarding the message',
+                    $fullPayload
+                );
+
+                return null;
+            }
+
+            $objectId = $apObject;
+        } else {
+            $objectId = $apObject['id'];
+        }
+
+        $activity = $this->activityRepository->findByObjectId($objectId);
+        if ($activity) {
+            return $this->activityRepository->resolve($activity);
+        }
+
+        $this->logger->debug(
+            'fetching object from {url} as no local copy of activity found',
+            ['url' => $objectId]
+        );
+
+        $object = \is_string($apObject)
+            ? $this->apHttpClient->getActivityObject($apObject)
+            : $apObject;
+
+        if (!$object) {
+            $this->logger->error(
+                "The activity is not found and we couldn't get the object from the url, discarding",
+                $fullPayload
+            );
+
+            return null;
+        }
+
+        $calledUrl = $objectId;
+        $fetchedUrl = $object['id'];
+        $adjustedUrl = null;
+
+        if ($fetchedUrl !== $calledUrl) {
+            $this->logger->warning(
+                'the url {url} returned a different object id: {id}',
+                ['url' => $calledUrl, 'id' => $fetchedUrl]
+            );
+
+            $adjustedUrl = $fetchedUrl;
+        }
+
+        $this->logger->debug(
+            'dispatching a ChainActivityMessage, because the object could not be found',
+            ['o' => $apObject]
+        );
+        $this->logger->debug('the object for ChainActivityMessage with object', ['o' => $object]);
+
+        $chainDispatch($object, $adjustedUrl);
+
+        return null;
     }
 
     public function extractMarkdownSummary(array $apObject): ?string

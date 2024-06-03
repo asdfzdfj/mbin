@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{%- block title -%}
+    {{- 'emojis'|trans }} - {{ parent() -}}
+{%- endblock -%}
+
+{% block mainClass %}page-admin-emojis{% endblock %}
+
+{% block header_nav %}
+{% endblock %}
+
+{% block sidebar_top %}
+{% endblock %}
+
+{% block body %}
+    {% include 'admin/_options.html.twig' %}
+    <div class="pills">
+        <menu>
+            {#<form action="path('admin_emoji_add')" method="POST" class="me-2">#}
+            <form action="#" method="POST" class="me-2">
+                <input type="hidden" name="token" value="{{ csrf_token('admin_emoji_add') }}">
+                <button class="btn btn__primary" type="submit"
+                    data-action="confirmation#ask" data-confirmation-message-param="{{ 'not_implemented'|trans }}">
+                    {{ 'emoji_add'|trans }}
+                </button>
+            </form>
+            <form action="#" method="POST" class="me-2">
+                <input type="hidden" name="token" value="{{ csrf_token('admin_emoji_add_pack') }}">
+                <button class="btn btn__secondary" type="submit"
+                    data-action="confirmation#ask" data-confirmation-message-param="{{ 'not_implemented'|trans }}">
+                    {{ 'emoji_add_pack'|trans }}
+                </button>
+            </form>
+        </menu>
+    </div>
+    <div class="section">
+        <div class="container">
+            {{ form_start(form) }}
+            <div class="flex" style="align-items: center">
+                {{ form_widget(form.query) }}
+                <button class="btn btn__primary" type="submit"
+                    title="{{ 'search'|trans }}" aria-label="{{ 'search'|trans }}">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="flex flex-wrap">
+                {{ form_widget(form.category, {attr: {'aria-label': 'filter.emoji.category.label'|trans}}) }}
+                {{ form_widget(form.domain, {attr: {'aria-label': 'filter.emoji.domain.label'|trans}}) }}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <div class="section emoji-columns">
+        <ul>
+            {% for emoji in emojis %}
+                <li class="emoji-preview">
+                    <div class="emoji-preview__icon">
+                        <img class="emoji" loading="lazy" src="{{ emoji_asset(emoji) }}"/>
+                    </div>
+                    <div class="emoji-preview__info">
+                        <p class="shortcode"><code>{{ emoji.formatShortcode }}</code></p>
+                        {% if criteria.domain is not same as 'local' %}
+                            <small>{{ emoji.isRemote() ? emoji.apDomain : 'emoji_local_instance'|trans }}</small>
+                        {% elseif not criteria.category %}
+                            <small>{{ emoji.category|default('emoji_uncategorized'|trans) }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="emoji-preview__actions">
+                        {% if emoji.isRemote() %}
+                            <a class="icon" aria-label="import" title="import">
+                                <i aria-hidden="true" class="fa-solid fa-plus"></i>
+                            </a>
+                        {% else %}
+                            <a class="icon" aria-label="edit" title="edit">
+                                <i aria-hidden="true" class="fa-solid fa-edit"></i>
+                            </a>
+                            <a class="icon danger" aria-label="delete" title="delete">
+                                <i aria-hidden="true" class="fa-solid fa-trash-can"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% if emojis.haveToPaginate is defined and emojis.haveToPaginate %}
+        {{ pagerfanta(emojis, null, {'pageParameter':'[p]'}) }}
+    {% endif %}
+{% endblock %}

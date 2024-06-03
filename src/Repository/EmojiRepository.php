@@ -98,22 +98,35 @@ class EmojiRepository extends ServiceEntityRepository
 
     public function getCategories(): array
     {
-        return $this->createQueryBuilder('e')
-            ->select('e.category')->distinct()
-            ->andWhere('e.category IS NOT NULL')
-            ->getQuery()
+        return $this->_em
+            ->createQuery(
+                'SELECT DISTINCT e.category
+                FROM '.Emoji::class.' e
+                WHERE e.category IS NOT NULL
+                ORDER BY e.category ASC'
+            )
             ->getSingleColumnResult();
     }
 
-    public function findPaginated(EmojiPageView $criteria, string $domain = 'local'): PagerfantaInterface
+    public function getDomains(): array
     {
-        $qb = $this->createQueryBuilder('e')
-            ->where('e.apDomain = :domain')
-            ->setParameter('domain', $domain);
+        return $this->_em
+            ->createQuery(
+                'SELECT DISTINCT e.apDomain
+                FROM '.Emoji::class." e
+                WHERE e.apDomain != 'local'
+                ORDER BY e.apDomain ASC"
+            )
+            ->getSingleColumnResult();
+    }
 
-        if ($criteria->query) {
-            $qb->andWhere('LOWER(e.shortcode) LIKE :query')
-               ->setParameter('query', '%'.addcslashes(trim($criteria->query), '%_\\').'%');
+    public function findPaginated(EmojiPageView $criteria): PagerfantaInterface
+    {
+        $qb = $this->createQueryBuilder('e');
+
+        if ($criteria->domain) {
+            $qb->andWhere('e.apDomain = :domain')
+                ->setParameter('domain', $criteria->domain);
         }
 
         if ($criteria->category) {
@@ -123,6 +136,11 @@ class EmojiRepository extends ServiceEntityRepository
                 $qb->andWhere('e.category = :cat')
                    ->setParameter('cat', trim($criteria->category));
             }
+        }
+
+        if ($criteria->query) {
+            $qb->andWhere('LOWER(e.shortcode) LIKE :query')
+               ->setParameter('query', '%'.addcslashes(trim($criteria->query), '%_\\').'%');
         }
 
         $qb->addOrderBy('e.shortcode', 'ASC');

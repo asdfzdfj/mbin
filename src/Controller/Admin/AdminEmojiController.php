@@ -2,33 +2,34 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
+use App\Controller\AbstractController;
 use App\Form\EmojiPageViewType;
 use App\PageView\EmojiPageView;
 use App\Repository\EmojiRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-class EmojiListController extends AbstractController
+class AdminEmojiController extends AbstractController
 {
-    public function __construct(
-        private readonly TokenStorageInterface $tokenStorage,
-        private readonly EmojiRepository $repository,
-    ) {
+    public function __construct(private readonly EmojiRepository $repository)
+    {
     }
 
-    public function __invoke(?string $category, Request $request): Response
+    #[IsGranted('ROLE_ADMIN')]
+    public function __invoke(string $category = null, string $domain = null, Request $request): Response
     {
         $criteria = new EmojiPageView(
             $this->getPageNb($request),
             $category,
-            EmojiPageView::DOMAIN_LOCAL
+            $category ? EmojiPageView::DOMAIN_LOCAL : $domain,
         );
 
         $form = $this->createForm(EmojiPageViewType::class, $criteria, [
             'categories' => $this->repository->getCategories(),
+            'domains' => $this->repository->getDomains(),
         ]);
 
         $form->handleRequest($request);
@@ -36,7 +37,7 @@ class EmojiListController extends AbstractController
         $emojis = $this->repository->findPaginated($criteria);
 
         return $this->render(
-            'emoji/list.html.twig',
+            'admin/emojis.html.twig',
             [
                 'emojis' => $emojis,
                 'form' => $form,

@@ -48,6 +48,12 @@
             </a>
         </li>
         <li>
+            <a href="{{ path('admin_emojis') }}"
+               class="{{ html_classes({'active': is_route_name('admin_emojis')}) }}">
+                {{ 'emojis'|trans }}
+            </a>
+        </li>
+        <li>
             <a href="{{ path('admin_federation') }}"
                class="{{ html_classes({'active': is_route_name('admin_federation')}) }}">
                 {{ 'federation'|trans }}
